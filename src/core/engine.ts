@@ -1,5 +1,5 @@
-import { randomPiece } from "./tetromino";
-import { type Board, BOARD_HEIGHT, BOARD_WIDTH, Cell, type Piece } from "./types";
+import { randomPiece, rotatePiece } from "./tetromino";
+import { type Action, type Board, BOARD_HEIGHT, BOARD_WIDTH, Cell, type Piece } from "./types";
 
 export class GameEngine {
   board: Board;
@@ -58,19 +58,85 @@ export class GameEngine {
   }
 
   tick() {
-    const moved: Piece = {
+    this.moveDown();
+    this.render();
+  }
+
+  applyAction(action: Action) {
+    switch (action) {
+      case "moveLeft":
+        this.move(-1);
+        break;
+      case "moveRight":
+        this.move(1);
+        break;
+      case "rotate":
+        this.rotate();
+        break;
+      case "softDrop":
+        this.moveDown();
+        break;
+      case "hardDrop":
+        this.drop();
+        break;
+    }
+    this.render();
+  }
+
+  private move(dx: number) {
+    if (this.status !== "playing") return;
+
+    const movedPiece: Piece = {
       ...this.currentPiece,
-      position: {
-        x: this.currentPiece.position.x,
-        y: this.currentPiece.position.y + 1,
-      },
+      position: { x: this.currentPiece.position.x + dx, y: this.currentPiece.position.y },
     };
 
-    if (this.hasCollision(moved)) {
+    if (!this.hasCollision(movedPiece)) {
+      this.currentPiece = movedPiece;
+    }
+  }
+
+  private moveDown() {
+    const moved: Piece = {
+      ...this.currentPiece,
+      position: { x: this.currentPiece.position.x, y: this.currentPiece.position.y + 1 },
+    };
+    if (!this.hasCollision(moved)) {
+      this.currentPiece = moved;
+    } else {
       this.mergePiece(this.currentPiece);
       this.currentPiece = randomPiece();
-    } else {
-      this.currentPiece = moved;
     }
+  }
+
+  private rotate() {
+    if (this.status !== "playing") return;
+
+    const rotatedPiece = rotatePiece(this.currentPiece);
+    if (!this.hasCollision(rotatedPiece)) {
+      this.currentPiece = rotatedPiece;
+    }
+  }
+
+  private drop() {
+    if (this.status !== "playing") return;
+
+    const newPosition = { ...this.currentPiece.position };
+    while (!this.hasCollision({ ...this.currentPiece, position: { ...newPosition, y: newPosition.y + 1 } })) {
+      newPosition.y++;
+    }
+
+    this.currentPiece.position = newPosition;
+    this.tick();
+  }
+
+  private renderFn?: () => void;
+
+  render() {
+    this.renderFn?.();
+  }
+
+  setRenderFn(fn: () => void) {
+    this.renderFn = fn;
   }
 }

@@ -44,3 +44,8 @@ export function randomPiece(): Piece {
     position: { x: 3, y: 0 },
   };
 }
+
+export const rotatePiece = (piece: Piece): Piece => {
+  const newShape = piece.shape[0].map((_, colIndex) => piece.shape.map((row) => row[row.length - 1 - colIndex]));
+  return { ...piece, shape: newShape };
+};

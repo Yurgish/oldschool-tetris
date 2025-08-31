@@ -2,11 +2,13 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"],
       "@styles/*": ["src/styles/*"],
       "@core/*": ["src/core/*"],
       "@components/*": ["src/components/*"],
-      "@render/*": ["src/render/*"]
+      "@render/*": ["src/render/*"],
+      "@store/*": ["src/store/*"],
+      "@hooks/*": ["src/hooks/*"],
+      "@/*": ["src/*"]
     },
 
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",

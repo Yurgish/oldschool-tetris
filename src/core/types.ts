@@ -11,6 +11,8 @@ export const BOARD_HEIGHT = 20;
 export const BOARD_WIDTH_WITH_BORDERS = BOARD_WIDTH + 2;
 export const BOARD_HEIGHT_WITH_BORDERS = BOARD_HEIGHT + 2;
 
+export const BLOCKSIZE = 32 as const;
+
 export interface Position {
   x: number;
   y: number;
@@ -22,3 +24,5 @@ export interface Piece {
 }
 
 export type Board = Cell[][];
+
+export type Action = "moveLeft" | "moveRight" | "rotate" | "softDrop" | "hardDrop";
