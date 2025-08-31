@@ -10,6 +10,7 @@ interface CanvasRenderProps {
 export function renderTetrisCanvas({ ctx, board, currentPiece, blockSize = 32 }: CanvasRenderProps) {
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
   ctx.font = `${blockSize}px monospace`;
+  ctx.fillStyle = "lime";
   ctx.textBaseline = "top";
 
   const tempBoard = board.map((row) => [...row]);

@@ -34,7 +34,7 @@ export function TetrisCanvas() {
         width={BLOCKSIZE * BOARD_WIDTH_WITH_BORDERS}
         height={BLOCKSIZE * BOARD_HEIGHT_WITH_BORDERS}
       />
-      <div>
+      <div className="text-2xl flex justify-between">
         <button onClick={start}>Start</button>
         <button onClick={pause}>Pause</button>
         <button onClick={reset}>Reset</button>

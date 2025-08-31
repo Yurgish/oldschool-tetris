@@ -1,3 +1,5 @@
+import { sleep } from "@utils/index";
+
 import { randomPiece, rotatePiece } from "./tetromino";
 import { type Action, type Board, BOARD_HEIGHT, BOARD_WIDTH, Cell, type Piece } from "./types";
 
@@ -8,6 +10,7 @@ export class GameEngine {
   lines: number;
   level: number;
   status: "menu" | "playing" | "paused" | "gameover";
+  animationStatus: "idle" | "running";
 
   constructor() {
     this.board = this.createEmptyBoard();
@@ -16,6 +19,7 @@ export class GameEngine {
     this.lines = 0;
     this.level = 1;
     this.status = "playing";
+    this.animationStatus = "idle";
   }
 
   private createEmptyBoard(): Board {
@@ -58,11 +62,14 @@ export class GameEngine {
   }
 
   tick() {
+    if (this.animationStatus === "running") return;
     this.moveDown();
     this.render();
   }
 
   applyAction(action: Action) {
+    if (this.animationStatus === "running") return;
+
     switch (action) {
       case "moveLeft":
         this.move(-1);
@@ -105,6 +112,7 @@ export class GameEngine {
       this.currentPiece = moved;
     } else {
       this.mergePiece(this.currentPiece);
+      this.checkAndClearLines();
       this.currentPiece = randomPiece();
     }
   }
@@ -128,6 +136,7 @@ export class GameEngine {
 
     this.currentPiece.position = newPosition;
     this.tick();
+    this.checkAndClearLines();
   }
 
   private renderFn?: () => void;
@@ -138,5 +147,75 @@ export class GameEngine {
 
   setRenderFn(fn: () => void) {
     this.renderFn = fn;
+  }
+
+  // this works but with some issues, fix later
+  async animateLineClear({ linesToClear }: { linesToClear: number[] }) {
+    this.animationStatus = "running";
+
+    const oldBoard = this.board.map((row) => [...row]);
+
+    for (const line of linesToClear) {
+      for (let x = 0; x < BOARD_WIDTH; x++) {
+        this.board[line][x] = Cell.EMPTY;
+        this.render();
+        await sleep(70);
+      }
+    }
+
+    const minLine = Math.min(...linesToClear);
+    for (let y = minLine - 1; y >= 0; y--) {
+      for (let x = 0; x < BOARD_WIDTH; x++) {
+        if (this.board[y][x] === Cell.BLOCK) {
+          this.board[y][x] = Cell.EMPTY;
+          this.render();
+          await sleep(70);
+        }
+      }
+    }
+
+    const newBoard: Board = Array.from({ length: BOARD_HEIGHT }, () => Array(BOARD_WIDTH).fill(Cell.EMPTY));
+
+    for (let y = 0; y < BOARD_HEIGHT; y++) {
+      for (let x = 0; x < BOARD_WIDTH; x++) {
+        if (oldBoard[y][x] === Cell.BLOCK && !linesToClear.includes(y)) {
+          const linesBelow = linesToClear.filter((line) => line > y).length;
+          newBoard[y + linesBelow][x] = Cell.BLOCK;
+        }
+      }
+    }
+
+    for (let y = 0; y < BOARD_HEIGHT; y++) {
+      for (let x = 0; x < BOARD_WIDTH; x++) {
+        if (newBoard[y][x] === Cell.BLOCK) {
+          this.board[y][x] = Cell.BLOCK;
+          this.render();
+          await sleep(70);
+        }
+      }
+    }
+
+    this.animationStatus = "idle";
+  }
+
+  private async checkAndClearLines() {
+    const linesToClear: number[] = [];
+
+    for (let y = 0; y < this.board.length; y++) {
+      if (this.board[y].every((cell) => cell === Cell.BLOCK)) {
+        linesToClear.push(y);
+      }
+    }
+
+    if (linesToClear.length > 0) {
+      this.lines += linesToClear.length;
+      this.score += linesToClear.length * 100 * this.level;
+
+      await this.animateLineClear({
+        linesToClear,
+      });
+
+      this.render();
+    }
   }
 }
