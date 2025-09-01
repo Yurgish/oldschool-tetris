@@ -150,6 +150,7 @@ export class GameEngine {
   }
 
   // this works but with some issues, fix later
+  // not working when multiple lines are cleared
   async animateLineClear({ linesToClear }: { linesToClear: number[] }) {
     this.animationStatus = "running";
 
