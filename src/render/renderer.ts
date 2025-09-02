@@ -1,4 +1,4 @@
-import { type Board, BOARD_HEIGHT, BOARD_WIDTH, Cell, type Piece } from "@core/types";
+import { type Board, BOARD_HEIGHT, BOARD_WIDTH, Cell, DELAY_ANIMATION, type Piece } from "@core/types";
 
 async function loadFont(name: string, url: string) {
   const font = new FontFace(name, `url(${url})`);
@@ -67,12 +67,40 @@ export class TetrisRenderer {
     this.drawBottom();
   }
 
-  async animateLineClear(board: Board, lines: number[]) {
+  async animateLineClear(board: Board, lines: number[], finalBoard: Board) {
+    const tempBoard = structuredClone(board);
+
     for (const y of lines) {
       for (let x = 0; x < BOARD_WIDTH; x++) {
-        await this.delay(100);
-        board[y][x] = Cell.EMPTY;
-        this.render(board);
+        await this.delay(DELAY_ANIMATION);
+        tempBoard[y][x] = Cell.EMPTY;
+        this.render(tempBoard);
+      }
+    }
+
+    if (lines.length > 0) {
+      const highestLine = Math.min(...lines);
+
+      for (let y = 0; y <= highestLine - 1; y++) {
+        for (let x = 0; x < BOARD_WIDTH; x++) {
+          if (tempBoard[y][x] === Cell.BLOCK) {
+            await this.delay(DELAY_ANIMATION);
+
+            tempBoard[y][x] = Cell.EMPTY;
+
+            this.render(tempBoard);
+          }
+        }
+      }
+    }
+
+    for (let y = 0; y <= BOARD_HEIGHT - 1; y++) {
+      for (let x = 0; x < BOARD_WIDTH; x++) {
+        if (finalBoard[y][x] === Cell.BLOCK && tempBoard[y][x] === Cell.EMPTY) {
+          await this.delay(DELAY_ANIMATION);
+          tempBoard[y][x] = Cell.BLOCK;
+          this.render(tempBoard);
+        }
       }
     }
   }

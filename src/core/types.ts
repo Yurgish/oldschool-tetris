@@ -29,5 +29,7 @@ export type Action = "moveLeft" | "moveRight" | "rotate" | "softDrop" | "hardDro
 
 export type TetrisRenderer = {
   render: (board: Board, currentPiece: Piece) => void;
-  animateLineClear: (board: Board, lines: number[]) => Promise<void>;
+  animateLineClear: (board: Board, lines: number[], finalBoard: Board) => Promise<void>;
 };
+
+export const DELAY_ANIMATION = 40;

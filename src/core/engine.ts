@@ -181,13 +181,17 @@ export class GameEngine {
       this.lines += linesToClear.length;
       this.score += linesToClear.length * 100 * this.level;
 
+      // Обчислюємо кінцевий стан дошки, але поки не оновлюємо this.board
+      const finalBoard = this.dropBlocks(structuredClone(this.board), linesToClear);
+
       this.animationStatus = "running";
       if (this.renderer) {
-        await this.renderer.animateLineClear(this.board, linesToClear);
+        // Тепер анімація приймає кінцевий стан дошки
+        await this.renderer.animateLineClear(this.board, linesToClear, finalBoard);
       }
-      this.animationStatus = "idle";
+      this.animationStatus = "idle"; // Після анімації, оновлюємо основний стан дошки
 
-      this.board = this.dropBlocks(this.board, linesToClear);
+      this.board = finalBoard;
     }
 
     return linesToClear;
