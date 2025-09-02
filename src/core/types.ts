@@ -26,3 +26,8 @@ export interface Piece {
 export type Board = Cell[][];
 
 export type Action = "moveLeft" | "moveRight" | "rotate" | "softDrop" | "hardDrop";
+
+export type TetrisRenderer = {
+  render: (board: Board, currentPiece: Piece) => void;
+  animateLineClear: (board: Board, lines: number[]) => Promise<void>;
+};

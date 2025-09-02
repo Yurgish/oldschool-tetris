@@ -1,1 +1,11 @@
+@font-face {
+  font-family: "Dina";
+  src: url("/fonts/DinaRemasterII.ttc") format("truetype");
+}
+
 @import "tailwindcss";
+
+body {
+  font-family: "Dina";
+  color: lime;
+}

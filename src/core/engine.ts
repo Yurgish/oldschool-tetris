@@ -1,7 +1,5 @@
-import { sleep } from "@utils/index";
-
 import { randomPiece, rotatePiece } from "./tetromino";
-import { type Action, type Board, BOARD_HEIGHT, BOARD_WIDTH, Cell, type Piece } from "./types";
+import { type Action, type Board, BOARD_HEIGHT, BOARD_WIDTH, Cell, type Piece, type TetrisRenderer } from "./types";
 
 export class GameEngine {
   board: Board;
@@ -11,6 +9,7 @@ export class GameEngine {
   level: number;
   status: "menu" | "playing" | "paused" | "gameover";
   animationStatus: "idle" | "running";
+  private renderer?: TetrisRenderer;
 
   constructor() {
     this.board = this.createEmptyBoard();
@@ -20,6 +19,14 @@ export class GameEngine {
     this.level = 1;
     this.status = "playing";
     this.animationStatus = "idle";
+  }
+
+  render() {
+    this.renderer?.render(this.board, this.currentPiece);
+  }
+
+  setRenderer(renderer: TetrisRenderer) {
+    this.renderer = renderer;
   }
 
   private createEmptyBoard(): Board {
@@ -139,67 +146,7 @@ export class GameEngine {
     this.checkAndClearLines();
   }
 
-  private renderFn?: () => void;
-
-  render() {
-    this.renderFn?.();
-  }
-
-  setRenderFn(fn: () => void) {
-    this.renderFn = fn;
-  }
-
-  // this works but with some issues, fix later
-  // not working when multiple lines are cleared
-  async animateLineClear({ linesToClear }: { linesToClear: number[] }) {
-    this.animationStatus = "running";
-
-    const oldBoard = this.board.map((row) => [...row]);
-
-    for (const line of linesToClear) {
-      for (let x = 0; x < BOARD_WIDTH; x++) {
-        this.board[line][x] = Cell.EMPTY;
-        this.render();
-        await sleep(70);
-      }
-    }
-
-    const minLine = Math.min(...linesToClear);
-    for (let y = minLine - 1; y >= 0; y--) {
-      for (let x = 0; x < BOARD_WIDTH; x++) {
-        if (this.board[y][x] === Cell.BLOCK) {
-          this.board[y][x] = Cell.EMPTY;
-          this.render();
-          await sleep(70);
-        }
-      }
-    }
-
-    const newBoard: Board = Array.from({ length: BOARD_HEIGHT }, () => Array(BOARD_WIDTH).fill(Cell.EMPTY));
-
-    for (let y = 0; y < BOARD_HEIGHT; y++) {
-      for (let x = 0; x < BOARD_WIDTH; x++) {
-        if (oldBoard[y][x] === Cell.BLOCK && !linesToClear.includes(y)) {
-          const linesBelow = linesToClear.filter((line) => line > y).length;
-          newBoard[y + linesBelow][x] = Cell.BLOCK;
-        }
-      }
-    }
-
-    for (let y = 0; y < BOARD_HEIGHT; y++) {
-      for (let x = 0; x < BOARD_WIDTH; x++) {
-        if (newBoard[y][x] === Cell.BLOCK) {
-          this.board[y][x] = Cell.BLOCK;
-          this.render();
-          await sleep(70);
-        }
-      }
-    }
-
-    this.animationStatus = "idle";
-  }
-
-  private async checkAndClearLines() {
+  async checkAndClearLines(): Promise<number[]> {
     const linesToClear: number[] = [];
 
     for (let y = 0; y < this.board.length; y++) {
@@ -212,11 +159,21 @@ export class GameEngine {
       this.lines += linesToClear.length;
       this.score += linesToClear.length * 100 * this.level;
 
-      await this.animateLineClear({
-        linesToClear,
-      });
+      this.animationStatus = "running";
+      if (this.renderer) {
+        await this.renderer.animateLineClear(this.board, linesToClear);
+      }
+      this.animationStatus = "idle";
 
-      this.render();
+      this.board = this.dropBlocks(this.board, linesToClear);
     }
+
+    return linesToClear;
+  }
+
+  private dropBlocks(board: Board, linesToClear: number[]): Board {
+    const cleared = board.filter((_, y) => !linesToClear.includes(y));
+    const emptyRows = Array.from({ length: linesToClear.length }, () => Array(board[0].length).fill(Cell.EMPTY));
+    return [...emptyRows, ...cleared];
   }
 }
