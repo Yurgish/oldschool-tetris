@@ -12,7 +12,7 @@ export class GameEngine {
   private renderer?: TetrisRenderer;
 
   constructor() {
-    this.board = this.createEmptyBoard();
+    this.board = this.createTestBoard({ fillBottomRows: 3, skipColumn: 4 });
     this.currentPiece = randomPiece();
     this.score = 0;
     this.lines = 0;
@@ -27,6 +27,29 @@ export class GameEngine {
 
   setRenderer(renderer: TetrisRenderer) {
     this.renderer = renderer;
+  }
+
+  /**
+   * Create an empty board or a custom board for testing.
+   * @param options Optional config:
+   *   - fillBottomRows: number of bottom rows to fill (default: 0)
+   *   - skipColumn: index of column to leave empty in filled rows (default: 0)
+   */
+  createTestBoard(options?: { fillBottomRows?: number; skipColumn?: number }): Board {
+    const fillBottomRows = options?.fillBottomRows ?? 0;
+    const skipColumn = options?.skipColumn ?? 0;
+    const board: Board = Array.from({ length: BOARD_HEIGHT }, () =>
+      Array.from({ length: BOARD_WIDTH }, () => Cell.EMPTY)
+    );
+
+    for (let i = 0; i < fillBottomRows; i++) {
+      const rowIdx = BOARD_HEIGHT - 1 - i;
+      for (let col = 0; col < BOARD_WIDTH; col++) {
+        board[rowIdx][col] = col === skipColumn ? Cell.EMPTY : Cell.BLOCK;
+      }
+    }
+
+    return board;
   }
 
   private createEmptyBoard(): Board {
@@ -143,7 +166,6 @@ export class GameEngine {
 
     this.currentPiece.position = newPosition;
     this.tick();
-    this.checkAndClearLines();
   }
 
   async checkAndClearLines(): Promise<number[]> {

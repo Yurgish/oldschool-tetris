@@ -22,6 +22,8 @@ export class TetrisRenderer {
     this.ctx.textBaseline = "top";
   }
 
+  private delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
+
   private drawCell(x: number, y: number, filled: boolean) {
     this.ctx.fillText(filled ? "[]" : " .", (x + 1) * this.blockSize, y * this.blockSize);
   }
@@ -66,14 +68,12 @@ export class TetrisRenderer {
   }
 
   async animateLineClear(board: Board, lines: number[]) {
-    const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
-
-    for (let x = 0; x < BOARD_WIDTH; x++) {
-      for (const y of lines) {
+    for (const y of lines) {
+      for (let x = 0; x < BOARD_WIDTH; x++) {
+        await this.delay(100);
         board[y][x] = Cell.EMPTY;
+        this.render(board);
       }
-      this.render(board);
-      await delay(40);
     }
   }
 }
