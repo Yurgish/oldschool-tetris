@@ -7,8 +7,6 @@ export function useUserInput(engine: GameEngine) {
   const setStatus = useGameStore((s) => s.setStatus);
 
   useEffect(() => {
-    if (status !== "playing") return;
-
     function handleKey(e: KeyboardEvent) {
       switch (e.code) {
         case "ArrowLeft":
@@ -34,7 +32,13 @@ export function useUserInput(engine: GameEngine) {
           break;
         case "KeyP":
           e.preventDefault();
-          setStatus("paused");
+          if (status === "menu" || status === "paused") {
+            setStatus("playing");
+            engine.status = "playing";
+          } else if (status === "playing") {
+            setStatus("paused");
+            engine.status = "paused";
+          }
           break;
         default:
           break;

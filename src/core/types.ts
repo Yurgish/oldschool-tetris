@@ -27,9 +27,11 @@ export type Board = Cell[][];
 
 export type Action = "moveLeft" | "moveRight" | "rotate" | "softDrop" | "hardDrop";
 
-export type TetrisRenderer = {
-  render: (board: Board, currentPiece: Piece) => void;
-  animateLineClear: (board: Board, lines: number[], finalBoard: Board) => Promise<void>;
-};
+export const DELAY_ANIMATION = 30;
 
-export const DELAY_ANIMATION = 40;
+export interface GameHUD {
+  score: number;
+  lines: number;
+  level: number;
+  nextPiece: Piece;
+}

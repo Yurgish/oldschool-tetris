@@ -5,18 +5,14 @@ import { useGameStore } from "@/store/gameStore";
 
 export function useTetris(tickSpeed = 1000) {
   const engineRef = useRef(new GameEngine());
-  const { status, setStatus, setScore, setLines, setLevel } = useGameStore();
+  const { status, setStatus } = useGameStore();
 
   useEffect(() => {
-    if (status !== "playing") return;
+    const engine = engineRef.current;
+    if (engine.status !== "playing") return;
 
     const interval = setInterval(() => {
-      const engine = engineRef.current;
       engine.tick();
-
-      setScore(engine.score);
-      setLines(engine.lines);
-      setLevel(engine.level);
 
       if (engine.status === "gameover") {
         setStatus("gameover");
@@ -24,16 +20,9 @@ export function useTetris(tickSpeed = 1000) {
     }, tickSpeed);
 
     return () => clearInterval(interval);
-  }, [status, tickSpeed, setScore, setLines, setLevel, setStatus]);
+  }, [setStatus, status, tickSpeed]);
 
   return {
     engine: engineRef.current,
-    status,
-    start: () => setStatus("playing"),
-    pause: () => setStatus("paused"),
-    reset: () => {
-      engineRef.current = new GameEngine();
-      setStatus("menu");
-    },
   };
 }

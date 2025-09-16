@@ -1,9 +1,12 @@
+import type { TetrisRenderer } from "@render/renderer";
+
 import { randomPiece, rotatePiece } from "./tetromino";
-import { type Action, type Board, BOARD_HEIGHT, BOARD_WIDTH, Cell, type Piece, type TetrisRenderer } from "./types";
+import { type Action, type Board, BOARD_HEIGHT, BOARD_WIDTH, Cell, type Piece } from "./types";
 
 export class GameEngine {
   board: Board;
   currentPiece: Piece;
+  nextPiece: Piece;
   score: number;
   lines: number;
   level: number;
@@ -14,15 +17,21 @@ export class GameEngine {
   constructor() {
     this.board = this.createTestBoard({ fillBottomRows: 3, skipColumn: 4 });
     this.currentPiece = randomPiece();
+    this.nextPiece = randomPiece();
     this.score = 0;
     this.lines = 0;
     this.level = 1;
-    this.status = "playing";
+    this.status = "menu";
     this.animationStatus = "idle";
   }
 
   render() {
-    this.renderer?.render(this.board, this.currentPiece);
+    this.renderer?.render(this.board, this.currentPiece, {
+      score: this.score,
+      lines: this.lines,
+      level: this.level,
+      nextPiece: this.nextPiece,
+    });
   }
 
   setRenderer(renderer: TetrisRenderer) {
@@ -54,6 +63,11 @@ export class GameEngine {
 
   private createEmptyBoard(): Board {
     return Array.from({ length: BOARD_HEIGHT }, () => Array.from({ length: BOARD_WIDTH }, () => Cell.EMPTY));
+  }
+
+  private spawnPiece() {
+    this.currentPiece = this.nextPiece;
+    this.nextPiece = randomPiece();
   }
 
   private hasCollision(piece: Piece): boolean {
@@ -142,8 +156,8 @@ export class GameEngine {
       this.currentPiece = moved;
     } else {
       this.mergePiece(this.currentPiece);
+      this.spawnPiece();
       this.checkAndClearLines();
-      this.currentPiece = randomPiece();
     }
   }
 
@@ -181,15 +195,18 @@ export class GameEngine {
       this.lines += linesToClear.length;
       this.score += linesToClear.length * 100 * this.level;
 
-      // Обчислюємо кінцевий стан дошки, але поки не оновлюємо this.board
       const finalBoard = this.dropBlocks(structuredClone(this.board), linesToClear);
 
       this.animationStatus = "running";
       if (this.renderer) {
-        // Тепер анімація приймає кінцевий стан дошки
-        await this.renderer.animateLineClear(this.board, linesToClear, finalBoard);
+        await this.renderer.animateLineClear(this.board, linesToClear, finalBoard, this.currentPiece, {
+          score: this.score,
+          lines: this.lines,
+          level: this.level,
+          nextPiece: this.nextPiece,
+        });
       }
-      this.animationStatus = "idle"; // Після анімації, оновлюємо основний стан дошки
+      this.animationStatus = "idle";
 
       this.board = finalBoard;
     }
