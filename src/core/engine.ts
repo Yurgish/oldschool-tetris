@@ -1,26 +1,28 @@
 import type { TetrisRenderer } from "@render/renderer";
 
-import { randomPiece, rotatePiece } from "./tetromino";
+import { rotatePiece } from "../utils/tetromino";
+import { Bag } from "./bag";
 import { type Action, type Board, BOARD_HEIGHT, BOARD_WIDTH, Cell, type Piece } from "./types";
 
 export class GameEngine {
   board: Board;
   currentPiece: Piece;
   nextPiece: Piece;
-  score: number;
-  lines: number;
-  level: number;
+  backToBack: boolean = false;
+  comboCount: number = 0;
+  score: number = 0;
+  lines: number = 0;
+  level: number = 1;
   status: "menu" | "playing" | "paused" | "gameover";
   animationStatus: "idle" | "running";
   private renderer?: TetrisRenderer;
+  private bag: Bag;
 
   constructor() {
     this.board = this.createTestBoard({ fillBottomRows: 3, skipColumn: 4 });
-    this.currentPiece = randomPiece();
-    this.nextPiece = randomPiece();
-    this.score = 0;
-    this.lines = 0;
-    this.level = 1;
+    this.bag = new Bag();
+    this.currentPiece = this.bag.next();
+    this.nextPiece = this.bag.next();
     this.status = "menu";
     this.animationStatus = "idle";
   }
@@ -67,7 +69,7 @@ export class GameEngine {
 
   private spawnPiece() {
     this.currentPiece = this.nextPiece;
-    this.nextPiece = randomPiece();
+    this.nextPiece = this.bag.next();
   }
 
   private hasCollision(piece: Piece): boolean {
@@ -125,7 +127,7 @@ export class GameEngine {
         this.rotate();
         break;
       case "softDrop":
-        this.moveDown();
+        this.moveDown(true);
         break;
       case "hardDrop":
         this.drop();
@@ -147,13 +149,16 @@ export class GameEngine {
     }
   }
 
-  private moveDown() {
+  private moveDown(isSoftDrop: boolean = false) {
     const moved: Piece = {
       ...this.currentPiece,
       position: { x: this.currentPiece.position.x, y: this.currentPiece.position.y + 1 },
     };
     if (!this.hasCollision(moved)) {
       this.currentPiece = moved;
+      if (isSoftDrop) {
+        this.score += 1;
+      }
     } else {
       this.mergePiece(this.currentPiece);
       this.spawnPiece();
@@ -174,11 +179,15 @@ export class GameEngine {
     if (this.status !== "playing") return;
 
     const newPosition = { ...this.currentPiece.position };
+    let dropDistance = 0;
+
     while (!this.hasCollision({ ...this.currentPiece, position: { ...newPosition, y: newPosition.y + 1 } })) {
       newPosition.y++;
+      dropDistance++;
     }
 
     this.currentPiece.position = newPosition;
+    this.score += dropDistance * 2;
     this.tick();
   }
 
