@@ -116,6 +116,7 @@ export class GameEngine {
 
   applyAction(action: Action) {
     if (this.animationStatus === "running") return;
+    if (this.status !== "playing") return;
 
     switch (action) {
       case "moveLeft":
@@ -151,6 +152,8 @@ export class GameEngine {
   }
 
   private moveDown(isSoftDrop: boolean = false) {
+    if (this.status !== "playing") return;
+
     const moved: Piece = {
       ...this.currentPiece,
       position: { x: this.currentPiece.position.x, y: this.currentPiece.position.y + 1 },
