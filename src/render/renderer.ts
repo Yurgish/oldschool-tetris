@@ -39,7 +39,7 @@ export class TetrisRenderer {
    * for rendering text elements.
    */
   async init() {
-    await loadFont("Dina", "/fonts/DinaRemasterII.ttc");
+    await loadFont("Dina", `${import.meta.env.BASE_URL}/fonts/DinaRemasterII.ttc`);
     this.ctx.font = `${this.blockSize}px Dina`;
     this.ctx.fillStyle = "lime";
     this.ctx.textBaseline = "top";
