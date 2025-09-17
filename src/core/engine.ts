@@ -1,6 +1,6 @@
 import type { TetrisRenderer } from "@render/renderer";
+import { rotatePiece } from "@utils/tetromino";
 
-import { rotatePiece } from "../utils/tetromino";
 import { Bag } from "./bag";
 import { BOARD_HEIGHT, BOARD_WIDTH } from "./constants";
 import { type Action, type Board, Cell, type Piece } from "./types";

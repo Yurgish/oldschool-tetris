@@ -1,4 +1,4 @@
-import { BLOCKSIZE } from "@core/types";
+import { BLOCKSIZE } from "@core/constants";
 import { useTetris } from "@hooks/useTetris";
 import { useUserInput } from "@hooks/useUserInput";
 import { TetrisRenderer } from "@render/renderer";

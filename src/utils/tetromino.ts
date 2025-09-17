@@ -1,5 +1,5 @@
-import { SRS_KICKS } from "../core/constants";
-import type { KickTable, Piece, Rotation } from "../core/types";
+import { SRS_KICKS } from "@core/constants";
+import type { KickTable, Piece, Rotation } from "@core/types";
 
 const rotateMatrix = (matrix: number[][]): number[][] => {
   const size = matrix.length;

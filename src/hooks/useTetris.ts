@@ -1,7 +1,6 @@
 import { GameEngine } from "@core/engine";
+import { useGameStore } from "@store/gameStore";
 import { useEffect, useRef } from "react";
-
-import { useGameStore } from "@/store/gameStore";
 
 export function useTetris(tickSpeed = 1000) {
   const engineRef = useRef(new GameEngine());
