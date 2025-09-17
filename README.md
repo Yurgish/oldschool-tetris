@@ -67,3 +67,44 @@ export default tseslint.config([
   },
 ])
 ```
+
+```
+oldschool-tetris
+├─ eslint.config.js
+├─ index.html
+├─ package-lock.json
+├─ package.json
+├─ public
+│  ├─ fonts
+│  │  └─ DinaRemasterII.ttc
+│  └─ vite.svg
+├─ README.md
+├─ src
+│  ├─ App.tsx
+│  ├─ components
+│  │  └─ TetrisCanvas.tsx
+│  ├─ core
+│  │  ├─ bag.ts
+│  │  ├─ engine.ts
+│  │  └─ types.ts
+│  ├─ hooks
+│  │  ├─ useTetris.ts
+│  │  └─ useUserInput.ts
+│  ├─ main.tsx
+│  ├─ render
+│  │  ├─ crtFragment.glsl
+│  │  ├─ crtVertex.glsl
+│  │  └─ renderer.ts
+│  ├─ store
+│  │  └─ gameStore.ts
+│  ├─ styles
+│  │  └─ index.css
+│  ├─ utils
+│  │  └─ tetromino.ts
+│  └─ vite-env.d.ts
+├─ tsconfig.app.json
+├─ tsconfig.json
+├─ tsconfig.node.json
+└─ vite.config.ts
+
+```

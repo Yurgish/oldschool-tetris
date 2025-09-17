@@ -5,29 +5,25 @@ export const Cell = {
 
 type Cell = (typeof Cell)[keyof typeof Cell];
 
-export const BOARD_WIDTH = 10;
-export const BOARD_HEIGHT = 20;
-
-export const BOARD_WIDTH_WITH_BORDERS = BOARD_WIDTH + 2;
-export const BOARD_HEIGHT_WITH_BORDERS = BOARD_HEIGHT + 2;
-
-export const BLOCKSIZE = 32 as const;
-
 export interface Position {
   x: number;
   y: number;
 }
 
+export type Rotation = 0 | 1 | 2 | 3; // 0=0°, 1=90°, 2=180°, 3=270°
+
+export type PieceType = "I" | "O" | "T" | "S" | "Z" | "J" | "L";
+
 export interface Piece {
   shape: number[][];
   position: Position;
+  rotation: Rotation;
+  type: PieceType;
 }
 
 export type Board = Cell[][];
 
 export type Action = "moveLeft" | "moveRight" | "rotate" | "softDrop" | "hardDrop";
-
-export const DELAY_ANIMATION = 30;
 
 export interface GameHUD {
   score: number;
@@ -35,3 +31,5 @@ export interface GameHUD {
   level: number;
   nextPiece: Piece;
 }
+
+export type KickTable = Record<string, [number, number][]>;

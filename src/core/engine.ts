@@ -2,7 +2,8 @@ import type { TetrisRenderer } from "@render/renderer";
 
 import { rotatePiece } from "../utils/tetromino";
 import { Bag } from "./bag";
-import { type Action, type Board, BOARD_HEIGHT, BOARD_WIDTH, Cell, type Piece } from "./types";
+import { BOARD_HEIGHT, BOARD_WIDTH } from "./constants";
+import { type Action, type Board, Cell, type Piece } from "./types";
 
 export class GameEngine {
   board: Board;
@@ -169,10 +170,7 @@ export class GameEngine {
   private rotate() {
     if (this.status !== "playing") return;
 
-    const rotatedPiece = rotatePiece(this.currentPiece);
-    if (!this.hasCollision(rotatedPiece)) {
-      this.currentPiece = rotatedPiece;
-    }
+    this.currentPiece = rotatePiece(this.currentPiece, (p) => this.hasCollision(p));
   }
 
   private drop() {

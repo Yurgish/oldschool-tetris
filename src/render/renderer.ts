@@ -1,14 +1,11 @@
 import {
-  type Board,
   BOARD_HEIGHT,
   BOARD_HEIGHT_WITH_BORDERS,
   BOARD_WIDTH,
   BOARD_WIDTH_WITH_BORDERS,
-  Cell,
   DELAY_ANIMATION,
-  type GameHUD,
-  type Piece,
-} from "@core/types";
+} from "@core/constants";
+import { type Board, Cell, type GameHUD, type Piece } from "@core/types";
 
 async function loadFont(name: string, url: string) {
   const font = new FontFace(name, `url(${url})`);
