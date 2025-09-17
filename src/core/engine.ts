@@ -20,7 +20,7 @@ export class GameEngine {
   private bag: Bag;
 
   constructor() {
-    this.board = this.createTestBoard({ fillBottomRows: 3, skipColumn: 4 });
+    this.board = this.createEmptyBoard();
     this.bag = new Bag();
     this.currentPiece = this.bag.next();
     this.nextPiece = this.bag.next();
@@ -47,7 +47,7 @@ export class GameEngine {
    *   - fillBottomRows: number of bottom rows to fill (default: 0)
    *   - skipColumn: index of column to leave empty in filled rows (default: 0)
    */
-  createTestBoard(options?: { fillBottomRows?: number; skipColumn?: number }): Board {
+  _createTestBoard(options?: { fillBottomRows?: number; skipColumn?: number }): Board {
     const fillBottomRows = options?.fillBottomRows ?? 0;
     const skipColumn = options?.skipColumn ?? 0;
     const board: Board = Array.from({ length: BOARD_HEIGHT }, () =>
@@ -64,9 +64,9 @@ export class GameEngine {
     return board;
   }
 
-  // private createEmptyBoard(): Board {
-  //   return Array.from({ length: BOARD_HEIGHT }, () => Array.from({ length: BOARD_WIDTH }, () => Cell.EMPTY));
-  // }
+  private createEmptyBoard(): Board {
+    return Array.from({ length: BOARD_HEIGHT }, () => Array.from({ length: BOARD_WIDTH }, () => Cell.EMPTY));
+  }
 
   private spawnPiece() {
     this.currentPiece = this.nextPiece;
