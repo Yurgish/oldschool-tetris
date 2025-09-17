@@ -1,33 +1,50 @@
 import { BLOCKSIZE } from "@core/constants";
 import { useTetris } from "@hooks/useTetris";
 import { useUserInput } from "@hooks/useUserInput";
+import { CRTCanvas } from "@render/CRTCanvas";
 import { TetrisRenderer } from "@render/renderer";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export function TetrisCanvas() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const tetrisRef = useRef<HTMLCanvasElement>(null);
+  const [canvasReady, setCanvasReady] = useState<HTMLCanvasElement | null>(null);
   const { engine } = useTetris(500);
+
   useUserInput(engine);
 
+  const height = window.innerHeight;
+  const width = (height * 4) / 3;
+
   useEffect(() => {
-    async function setupRenderer() {
-      if (!canvasRef.current) return;
-      const ctx = canvasRef.current.getContext("2d");
-      if (!ctx) return;
+    if (!tetrisRef.current) return;
 
-      canvasRef.current.width = window.innerWidth;
-      canvasRef.current.height = window.innerHeight;
+    const ctx = tetrisRef.current.getContext("2d");
+    if (!ctx) return;
 
-      const renderer = new TetrisRenderer(ctx, BLOCKSIZE);
-      await renderer.init();
+    tetrisRef.current.width = width;
+    tetrisRef.current.height = height;
 
+    const renderer = new TetrisRenderer(ctx, BLOCKSIZE);
+    renderer.init().then(() => {
       engine.setRenderer(renderer);
-
       engine.render();
-    }
+    });
 
-    setupRenderer();
-  }, [engine]);
+    setCanvasReady(tetrisRef.current);
+  }, [engine, height, width]);
 
-  return <canvas ref={canvasRef} />;
+  return (
+    <div className="relative flex items-center justify-center h-screen bg-gray-950" style={{ width: width }}>
+      <canvas
+        ref={tetrisRef}
+        style={{
+          background: "#1a202c",
+          visibility: "hidden",
+          width: width,
+          height: height,
+        }}
+      />
+      {canvasReady && <CRTCanvas sourceCanvas={canvasReady} width={width} height={height} />}
+    </div>
+  );
 }

@@ -8,6 +8,7 @@ export function useTetris(tickSpeed = 1000) {
 
   useEffect(() => {
     const engine = engineRef.current;
+
     if (engine.status !== "playing") return;
 
     const interval = setInterval(() => {

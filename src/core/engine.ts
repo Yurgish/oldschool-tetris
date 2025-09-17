@@ -64,9 +64,9 @@ export class GameEngine {
     return board;
   }
 
-  private createEmptyBoard(): Board {
-    return Array.from({ length: BOARD_HEIGHT }, () => Array.from({ length: BOARD_WIDTH }, () => Cell.EMPTY));
-  }
+  // private createEmptyBoard(): Board {
+  //   return Array.from({ length: BOARD_HEIGHT }, () => Array.from({ length: BOARD_WIDTH }, () => Cell.EMPTY));
+  // }
 
   private spawnPiece() {
     this.currentPiece = this.nextPiece;
