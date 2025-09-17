@@ -6,6 +6,7 @@ import glsl from "vite-plugin-glsl";
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss(), glsl()],
+  base: "/oldschool-tetris",
   resolve: {
     alias: {
       "@styles": "/src/styles",
