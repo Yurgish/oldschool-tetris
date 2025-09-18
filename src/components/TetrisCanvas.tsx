@@ -8,7 +8,7 @@ import { useEffect, useRef, useState } from "react";
 export function TetrisCanvas() {
   const tetrisRef = useRef<HTMLCanvasElement>(null);
   const [canvasReady, setCanvasReady] = useState<HTMLCanvasElement | null>(null);
-  const { engine } = useTetris(500);
+  const { engine } = useTetris();
 
   useUserInput(engine);
 

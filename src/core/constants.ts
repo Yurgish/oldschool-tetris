@@ -10,6 +10,14 @@ export const BLOCKSIZE = 32;
 
 export const DELAY_ANIMATION = 18;
 
+export const INITIAL_TICK_DELAY = 500;
+
+export const MIN_TICK_DELAY = 50;
+
+export const LEVEL_UP_LINES = 10;
+
+export const TICK_DELAY_DECREASE = 0.9; // Each level, the tick delay is multiplied by this factor
+
 export const SRS_KICKS: { normal: KickTable; I: KickTable } = {
   normal: {
     "0>1": [
@@ -128,3 +136,11 @@ export const SRS_KICKS: { normal: KickTable; I: KickTable } = {
     ],
   },
 } as const;
+
+export const LETTERS = {
+  T: ["[][][][][][]", "    [][]    ", "    [][]    ", "    [][]    ", "    [][]    ", "    [][]    ", "    [][]    "],
+  E: ["[][][][][][]", "[][]        ", "[][]        ", "[][][][][][]", "[][]        ", "[][]        ", "[][][][][][]"],
+  R: ["[][][][][]  ", "[][]    [][]", "[][]    [][]", "[][][][][]  ", "[][]  [][]  ", "[][]   [][] ", "[][]    [][]"],
+  I: ["[][][][][][]", "    [][]    ", "    [][]    ", "    [][]    ", "    [][]    ", "    [][]    ", "[][][][][][]"],
+  S: ["[][][][][][]", "[][]        ", "[][]        ", "[][][][][][]", "        [][]", "        [][]", "[][][][][][]"],
+};

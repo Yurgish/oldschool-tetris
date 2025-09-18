@@ -2,39 +2,57 @@ import type { TetrisRenderer } from "@render/renderer";
 import { rotatePiece } from "@utils/tetromino";
 
 import { Bag } from "./bag";
-import { BOARD_HEIGHT, BOARD_WIDTH } from "./constants";
+import {
+  BOARD_HEIGHT,
+  BOARD_WIDTH,
+  INITIAL_TICK_DELAY,
+  LEVEL_UP_LINES,
+  MIN_TICK_DELAY,
+  TICK_DELAY_DECREASE,
+} from "./constants";
 import { type Action, type Board, Cell, type Piece } from "./types";
 
 export class GameEngine {
   board: Board;
   currentPiece: Piece;
   nextPiece: Piece;
-  backToBack: boolean = false;
-  comboCount: number = 0;
   score: number = 0;
   lines: number = 0;
-  level: number = 1;
+  level: number;
   status: "menu" | "playing" | "paused" | "gameover";
   animationStatus: "idle" | "running";
   private renderer?: TetrisRenderer;
   private bag: Bag;
 
-  constructor() {
+  tickSpeed: number;
+
+  constructor(startLevel: number = 1) {
+    // this.board = this._createTestBoard({ fillBottomRows: 4, skipColumn: 4 }); for testing
     this.board = this.createEmptyBoard();
     this.bag = new Bag();
     this.currentPiece = this.bag.next();
     this.nextPiece = this.bag.next();
     this.status = "menu";
     this.animationStatus = "idle";
+    this.level = startLevel;
+
+    this.tickSpeed = Math.max(
+      MIN_TICK_DELAY,
+      Math.floor(INITIAL_TICK_DELAY * Math.pow(TICK_DELAY_DECREASE, startLevel - 1))
+    );
   }
 
   render() {
-    this.renderer?.render(this.board, this.currentPiece, {
-      score: this.score,
-      lines: this.lines,
-      level: this.level,
-      nextPiece: this.nextPiece,
-    });
+    if (this.status === "menu") {
+      this.renderer?.renderMenu();
+    } else {
+      this.renderer?.render(this.board, this.currentPiece, {
+        score: this.score,
+        lines: this.lines,
+        level: this.level,
+        nextPiece: this.nextPiece,
+      });
+    }
   }
 
   setRenderer(renderer: TetrisRenderer) {
@@ -204,6 +222,12 @@ export class GameEngine {
     if (linesToClear.length > 0) {
       this.lines += linesToClear.length;
       this.score += linesToClear.length * 100 * this.level;
+
+      // Level up only once per threshold
+      while (this.lines >= this.level * LEVEL_UP_LINES) {
+        this.level++;
+        this.tickSpeed = Math.max(MIN_TICK_DELAY, Math.floor(this.tickSpeed * TICK_DELAY_DECREASE));
+      }
 
       const finalBoard = this.dropBlocks(structuredClone(this.board), linesToClear);
 

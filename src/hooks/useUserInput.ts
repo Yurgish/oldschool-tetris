@@ -1,44 +1,56 @@
 import { GameEngine } from "@core/engine";
 import { useGameStore } from "@store/gameStore";
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 
 export function useUserInput(engine: GameEngine) {
   const status = useGameStore((s) => s.status);
   const setStatus = useGameStore((s) => s.setStatus);
 
+  const togglePause = useCallback(() => {
+    if (status === "paused") {
+      setStatus("playing");
+      engine.status = "playing";
+    } else if (status === "playing") {
+      setStatus("paused");
+      engine.status = "paused";
+    }
+  }, [status, setStatus, engine]);
+
+  const startGame = useCallback(() => {
+    if (status === "menu") {
+      setStatus("playing");
+      engine.status = "playing";
+    }
+  }, [status, setStatus, engine]);
+
   useEffect(() => {
     function handleKey(e: KeyboardEvent) {
+      const handled = ["ArrowLeft", "ArrowRight", "ArrowDown", "ArrowUp", "KeyX", "Space", "KeyP", "KeyS"];
+      if (handled.includes(e.code)) {
+        e.preventDefault();
+      }
       switch (e.code) {
         case "ArrowLeft":
-          e.preventDefault();
           engine.applyAction("moveLeft");
           break;
         case "ArrowRight":
-          e.preventDefault();
           engine.applyAction("moveRight");
           break;
         case "ArrowDown":
-          e.preventDefault();
           engine.applyAction("softDrop");
           break;
         case "ArrowUp":
         case "KeyX":
-          e.preventDefault();
           engine.applyAction("rotate");
           break;
         case "Space":
-          e.preventDefault();
           engine.applyAction("hardDrop");
           break;
         case "KeyP":
-          e.preventDefault();
-          if (status === "menu" || status === "paused") {
-            setStatus("playing");
-            engine.status = "playing";
-          } else if (status === "playing") {
-            setStatus("paused");
-            engine.status = "paused";
-          }
+          togglePause();
+          break;
+        case "KeyS":
+          startGame();
           break;
         default:
           break;
@@ -47,5 +59,5 @@ export function useUserInput(engine: GameEngine) {
 
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
-  }, [status, engine, setStatus]);
+  }, [status, engine, setStatus, togglePause, startGame]);
 }

@@ -4,6 +4,7 @@ import {
   BOARD_WIDTH,
   BOARD_WIDTH_WITH_BORDERS,
   DELAY_ANIMATION,
+  LETTERS,
 } from "@core/constants";
 import { type Board, Cell, type GameHUD, type Piece } from "@core/types";
 
@@ -43,6 +44,7 @@ export class TetrisRenderer {
     this.ctx.font = `${this.blockSize}px Dina`;
     this.ctx.fillStyle = "lime";
     this.ctx.textBaseline = "top";
+    this.ctx.textAlign = "left";
   }
 
   private delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
@@ -174,5 +176,44 @@ export class TetrisRenderer {
         }
       }
     }
+  }
+
+  renderMenu() {
+    this.ctx.save();
+
+    const textSize = 24;
+
+    this.ctx.textBaseline = "top";
+    this.ctx.fillStyle = "lime";
+    this.ctx.font = `${textSize}px Dina`;
+    this.ctx.textAlign = "center";
+
+    const tetrisArt = [
+      ...LETTERS.T.map(
+        (row, i) =>
+          row +
+          "   " +
+          LETTERS.E[i] +
+          "   " +
+          LETTERS.T[i] +
+          "   " +
+          LETTERS.R[i] +
+          "   " +
+          LETTERS.I[i] +
+          "   " +
+          LETTERS.S[i]
+      ),
+    ];
+
+    const startY = this.ctx.canvas.height / 4;
+    tetrisArt.forEach((line, i) => {
+      this.ctx.fillText(line, this.ctx.canvas.width / 2, startY + i * textSize);
+    });
+
+    this.ctx.fillStyle = "white";
+    this.ctx.font = "42px Dina";
+    this.ctx.fillText("PRESS [S] TO START", this.ctx.canvas.width / 2, (this.ctx.canvas.height * 3) / 4);
+
+    this.ctx.restore();
   }
 }
