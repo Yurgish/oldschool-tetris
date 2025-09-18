@@ -140,7 +140,7 @@ export class TetrisRenderer {
     this.drawInstructions();
   }
 
-  async animateLineClear(board: Board, lines: number[], finalBoard: Board, currentPiece: Piece, hud: GameHUD) {
+  async animateLineClear(board: Board, lines: number[], finalBoard: Board, hud: GameHUD, currentPiece?: Piece) {
     const tempBoard = structuredClone(board);
 
     for (const y of lines) {
@@ -178,10 +178,23 @@ export class TetrisRenderer {
     }
   }
 
+  async animateClearBlocks(board: Board, rows: number[], hud: GameHUD, currentPiece?: Piece) {
+    const tempBoard = structuredClone(board);
+    for (const y of rows) {
+      for (let x = 0; x < BOARD_WIDTH; x++) {
+        if (tempBoard[y][x] === Cell.BLOCK) {
+          await this.delay(DELAY_ANIMATION);
+          tempBoard[y][x] = Cell.EMPTY;
+          this.render(tempBoard, currentPiece, hud);
+        }
+      }
+    }
+  }
+
   renderMenu() {
     this.ctx.save();
 
-    const textSize = 24;
+    const textSize = 28;
 
     this.ctx.textBaseline = "top";
     this.ctx.fillStyle = "lime";
@@ -192,15 +205,15 @@ export class TetrisRenderer {
       ...LETTERS.T.map(
         (row, i) =>
           row +
-          "   " +
+          "  " +
           LETTERS.E[i] +
-          "   " +
+          "  " +
           LETTERS.T[i] +
-          "   " +
+          "  " +
           LETTERS.R[i] +
-          "   " +
+          " " +
           LETTERS.I[i] +
-          "   " +
+          "  " +
           LETTERS.S[i]
       ),
     ];

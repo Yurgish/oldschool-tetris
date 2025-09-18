@@ -1,6 +1,5 @@
+import type { GameStatus } from "@core/types";
 import { create } from "zustand";
-
-type GameStatus = "menu" | "playing" | "paused" | "gameover";
 
 interface GameState {
   status: GameStatus;

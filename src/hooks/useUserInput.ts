@@ -23,6 +23,15 @@ export function useUserInput(engine: GameEngine) {
     }
   }, [status, setStatus, engine]);
 
+  const restartGame = useCallback(() => {
+    if (status === "playing") {
+      setStatus("restarting");
+      engine.status = "restarting";
+      engine.restart();
+      setStatus("playing");
+    }
+  }, [status, setStatus, engine]);
+
   useEffect(() => {
     function handleKey(e: KeyboardEvent) {
       const handled = ["ArrowLeft", "ArrowRight", "ArrowDown", "ArrowUp", "KeyX", "Space", "KeyP", "KeyS"];
@@ -52,6 +61,9 @@ export function useUserInput(engine: GameEngine) {
         case "KeyS":
           startGame();
           break;
+        case "KeyR":
+          restartGame();
+          break;
         default:
           break;
       }
@@ -59,5 +71,5 @@ export function useUserInput(engine: GameEngine) {
 
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
-  }, [status, engine, setStatus, togglePause, startGame]);
+  }, [status, engine, setStatus, togglePause, startGame, restartGame]);
 }

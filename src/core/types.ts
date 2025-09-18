@@ -23,6 +23,8 @@ export interface Piece {
 
 export type Board = Cell[][];
 
+export type GameStatus = "menu" | "playing" | "paused" | "gameover" | "restarting";
+
 export type Action = "moveLeft" | "moveRight" | "rotate" | "softDrop" | "hardDrop";
 
 export interface GameHUD {

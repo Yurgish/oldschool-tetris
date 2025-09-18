@@ -10,7 +10,7 @@ import {
   MIN_TICK_DELAY,
   TICK_DELAY_DECREASE,
 } from "./constants";
-import { type Action, type Board, Cell, type Piece } from "./types";
+import { type Action, type Board, Cell, type GameStatus, type Piece } from "./types";
 
 export class GameEngine {
   board: Board;
@@ -19,7 +19,8 @@ export class GameEngine {
   score: number = 0;
   lines: number = 0;
   level: number;
-  status: "menu" | "playing" | "paused" | "gameover";
+  startLevel: number;
+  status: GameStatus;
   animationStatus: "idle" | "running";
   private renderer?: TetrisRenderer;
   private bag: Bag;
@@ -35,6 +36,7 @@ export class GameEngine {
     this.status = "menu";
     this.animationStatus = "idle";
     this.level = startLevel;
+    this.startLevel = startLevel;
 
     this.tickSpeed = Math.max(
       MIN_TICK_DELAY,
@@ -233,12 +235,18 @@ export class GameEngine {
 
       this.animationStatus = "running";
       if (this.renderer) {
-        await this.renderer.animateLineClear(this.board, linesToClear, finalBoard, this.currentPiece, {
-          score: this.score,
-          lines: this.lines,
-          level: this.level,
-          nextPiece: this.nextPiece,
-        });
+        await this.renderer.animateLineClear(
+          this.board,
+          linesToClear,
+          finalBoard,
+          {
+            score: this.score,
+            lines: this.lines,
+            level: this.level,
+            nextPiece: this.nextPiece,
+          },
+          this.currentPiece
+        );
       }
       this.animationStatus = "idle";
 
@@ -252,5 +260,50 @@ export class GameEngine {
     const cleared = board.filter((_, y) => !linesToClear.includes(y));
     const emptyRows = Array.from({ length: linesToClear.length }, () => Array(board[0].length).fill(Cell.EMPTY));
     return [...emptyRows, ...cleared];
+  }
+
+  private resetState() {
+    this.board = this.createEmptyBoard();
+    this.bag = new Bag();
+    this.score = 0;
+    this.lines = 0;
+    this.level = this.startLevel;
+    this.tickSpeed = Math.max(
+      MIN_TICK_DELAY,
+      Math.floor(INITIAL_TICK_DELAY * Math.pow(TICK_DELAY_DECREASE, this.startLevel - 1))
+    );
+    this.animationStatus = "idle";
+    this.status = "playing";
+  }
+
+  async restart() {
+    this.status = "restarting";
+    this.animationStatus = "running";
+
+    // get in utils
+    const filledRows = this.board
+      .map((row, idx) => (row.some((cell) => cell === Cell.BLOCK) ? idx : null))
+      .filter((idx) => idx !== null) as number[];
+
+    const minRow = Math.min(...filledRows);
+    const maxRow = Math.max(...filledRows);
+
+    const linesToClear = [];
+    for (let i = minRow; i <= maxRow; i++) {
+      linesToClear.push(i);
+    }
+
+    this.spawnPiece();
+
+    if (this.renderer) {
+      await this.renderer.animateClearBlocks(this.board, linesToClear, {
+        score: 0,
+        lines: 0,
+        level: this.startLevel,
+        nextPiece: this.nextPiece,
+      });
+    }
+    this.resetState();
+    this.render();
   }
 }
