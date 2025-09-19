@@ -1,5 +1,7 @@
-import type { TetrisRenderer } from "@render/renderer";
+// import type { TetrisRenderer } from "@render/renderer";
 import { rotatePiece } from "@utils/tetromino";
+
+import { APP_EVENTS, appEventEmitter } from "@/events/appEventEmmiter";
 
 import { Bag } from "./bag";
 import {
@@ -22,7 +24,7 @@ export class GameEngine {
   startLevel: number;
   status: GameStatus;
   animationStatus: "idle" | "running";
-  private renderer?: TetrisRenderer;
+  // private renderer?: TetrisRenderer;
   private bag: Bag;
 
   tickSpeed: number;
@@ -45,10 +47,21 @@ export class GameEngine {
   }
 
   render() {
+    // if (this.status === "menu") {
+    //   this.renderer?.renderMenu();
+    // } else {
+    //   this.renderer?.render(this.board, this.currentPiece, {
+    //     score: this.score,
+    //     lines: this.lines,
+    //     level: this.level,
+    //     nextPiece: this.nextPiece,
+    //   });
+    // }
+
     if (this.status === "menu") {
-      this.renderer?.renderMenu();
+      appEventEmitter.emit(APP_EVENTS.MENU);
     } else {
-      this.renderer?.render(this.board, this.currentPiece, {
+      appEventEmitter.emit(APP_EVENTS.RENDER, this.board, this.currentPiece, {
         score: this.score,
         lines: this.lines,
         level: this.level,
@@ -57,9 +70,9 @@ export class GameEngine {
     }
   }
 
-  setRenderer(renderer: TetrisRenderer) {
-    this.renderer = renderer;
-  }
+  // setRenderer(renderer: TetrisRenderer) {
+  //   this.renderer = renderer;
+  // }
 
   /**
    * Create an empty board or a custom board for testing.
@@ -234,8 +247,23 @@ export class GameEngine {
       const finalBoard = this.dropBlocks(structuredClone(this.board), linesToClear);
 
       this.animationStatus = "running";
-      if (this.renderer) {
-        await this.renderer.animateLineClear(
+      appEventEmitter.emit(
+        APP_EVENTS.ANIMATE_LINE_CLEAR,
+        this.board,
+        linesToClear,
+        finalBoard,
+        {
+          score: this.score,
+          lines: this.lines,
+          level: this.level,
+          nextPiece: this.nextPiece,
+        },
+        this.currentPiece
+      );
+
+      await new Promise<void>((resolve) => {
+        appEventEmitter.emit(
+          APP_EVENTS.ANIMATE_LINE_CLEAR,
           this.board,
           linesToClear,
           finalBoard,
@@ -245,9 +273,10 @@ export class GameEngine {
             level: this.level,
             nextPiece: this.nextPiece,
           },
-          this.currentPiece
+          this.currentPiece,
+          resolve
         );
-      }
+      });
       this.animationStatus = "idle";
 
       this.board = finalBoard;
@@ -286,21 +315,27 @@ export class GameEngine {
     const minRow = Math.min(...filledRows);
     const maxRow = Math.max(...filledRows);
 
-    const linesToClear = [];
+    const linesToClear: number[] = [];
     for (let i = minRow; i <= maxRow; i++) {
       linesToClear.push(i);
     }
 
     this.spawnPiece();
 
-    if (this.renderer) {
-      await this.renderer.animateClearBlocks(this.board, linesToClear, {
-        score: 0,
-        lines: 0,
-        level: this.startLevel,
-        nextPiece: this.nextPiece,
-      });
-    }
+    await new Promise<void>((resolve) => {
+      appEventEmitter.emit(
+        APP_EVENTS.ANIMATE_CLEAR_BLOCKS,
+        this.board,
+        linesToClear,
+        {
+          score: 0,
+          lines: 0,
+          level: this.startLevel,
+          nextPiece: this.nextPiece,
+        },
+        resolve
+      );
+    });
 
     this.animationStatus = "idle";
 

@@ -24,5 +24,11 @@ void main() {
     float noise = fract(sin(dot(distorted.xy, vec2(12.9898,78.233))) * 43758.5453 + uTime) * 0.04;
     color.rgb += noise;
 
+    float vignette = 1.0 - 0.2 * r2;
+    color.rgb *= vignette;
+
+    float lineNoise = fract(sin(distorted.y * 1234.0 + uTime * 10.0) * 43758.0) * 0.02;
+    color.rgb += lineNoise;
+
     gl_FragColor = color;
 }

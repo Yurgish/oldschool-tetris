@@ -5,6 +5,8 @@ import { CRTCanvas } from "@render/CRTCanvas";
 import { TetrisRenderer } from "@render/renderer";
 import { useEffect, useRef, useState } from "react";
 
+import { RendererManager } from "@/events/RendererManager";
+
 export function TetrisCanvas() {
   const tetrisRef = useRef<HTMLCanvasElement>(null);
   const [canvasReady, setCanvasReady] = useState<HTMLCanvasElement | null>(null);
@@ -25,12 +27,14 @@ export function TetrisCanvas() {
     tetrisRef.current.height = height;
 
     const renderer = new TetrisRenderer(ctx, BLOCKSIZE);
-    renderer.init().then(() => {
-      engine.setRenderer(renderer);
-      engine.render();
-    });
+
+    renderer.init().then(() => engine.render());
+
+    const manager = new RendererManager(renderer);
 
     setCanvasReady(tetrisRef.current);
+
+    return () => manager.unsubscribe();
   }, [engine, height, width]);
 
   return (

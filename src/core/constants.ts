@@ -6,7 +6,7 @@ export const BOARD_HEIGHT = 20;
 export const BOARD_WIDTH_WITH_BORDERS = BOARD_WIDTH + 2;
 export const BOARD_HEIGHT_WITH_BORDERS = BOARD_HEIGHT + 2;
 
-export const BLOCKSIZE = 32;
+export const BLOCKSIZE = 36;
 
 export const DELAY_ANIMATION = 18;
 
