@@ -1,4 +1,4 @@
-import type { Board, GameHUD, Piece } from "@core/types";
+import type { Board, GameHUD, GameStatus, Piece } from "@core/types";
 import { EventEmitter } from "events";
 
 export const APP_EVENTS = {
@@ -6,6 +6,7 @@ export const APP_EVENTS = {
   MENU: "menu",
   ANIMATE_LINE_CLEAR: "animateLineClear",
   ANIMATE_CLEAR_BLOCKS: "animateClearBlocks",
+  STATUS_CHANGED: "statusChanged",
 } as const;
 
 export interface AppEvents {
@@ -20,6 +21,7 @@ export interface AppEvents {
     done?: () => void
   ) => void;
   [APP_EVENTS.ANIMATE_CLEAR_BLOCKS]: (board: Board, linesToClear: number[], hud: GameHUD, done?: () => void) => void;
+  [APP_EVENTS.STATUS_CHANGED]: (status: GameStatus) => void;
 }
 
 interface AppEventEmitter extends EventEmitter {

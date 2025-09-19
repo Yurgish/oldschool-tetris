@@ -1,4 +1,3 @@
-// import type { TetrisRenderer } from "@render/renderer";
 import { rotatePiece } from "@utils/tetromino";
 
 import { APP_EVENTS, appEventEmitter } from "@/events/appEventEmmiter";
@@ -24,7 +23,6 @@ export class GameEngine {
   startLevel: number;
   status: GameStatus;
   animationStatus: "idle" | "running";
-  // private renderer?: TetrisRenderer;
   private bag: Bag;
 
   tickSpeed: number;
@@ -47,17 +45,7 @@ export class GameEngine {
   }
 
   render() {
-    // if (this.status === "menu") {
-    //   this.renderer?.renderMenu();
-    // } else {
-    //   this.renderer?.render(this.board, this.currentPiece, {
-    //     score: this.score,
-    //     lines: this.lines,
-    //     level: this.level,
-    //     nextPiece: this.nextPiece,
-    //   });
-    // }
-
+    if (this.status === "gameover") return;
     if (this.status === "menu") {
       appEventEmitter.emit(APP_EVENTS.MENU);
     } else {
@@ -69,10 +57,6 @@ export class GameEngine {
       });
     }
   }
-
-  // setRenderer(renderer: TetrisRenderer) {
-  //   this.renderer = renderer;
-  // }
 
   /**
    * Create an empty board or a custom board for testing.
@@ -103,6 +87,12 @@ export class GameEngine {
 
   private spawnPiece() {
     this.currentPiece = this.nextPiece;
+    if (this.hasCollision(this.currentPiece)) {
+      this.status = "gameover";
+      appEventEmitter.emit(APP_EVENTS.STATUS_CHANGED, this.status);
+      // this.restart();
+      return;
+    }
     this.nextPiece = this.bag.next();
   }
 
@@ -320,8 +310,6 @@ export class GameEngine {
       linesToClear.push(i);
     }
 
-    this.spawnPiece();
-
     await new Promise<void>((resolve) => {
       appEventEmitter.emit(
         APP_EVENTS.ANIMATE_CLEAR_BLOCKS,
@@ -341,6 +329,7 @@ export class GameEngine {
 
     this.resetState();
     this.render();
+    this.spawnPiece();
 
     this.status = "playing";
   }

@@ -117,7 +117,6 @@ export class TetrisRenderer {
   private drawNextPiece(nextPiece?: Piece) {
     if (!nextPiece) return;
 
-    // Центр board по Y
     const boardHeightPx = BOARD_HEIGHT * this.blockSize;
     const centerY = this.offsetY + boardHeightPx / 2;
 
@@ -202,14 +201,14 @@ export class TetrisRenderer {
     }
   }
 
-  renderMenu() {
+  async renderMenu() {
     this.ctx.save();
 
-    const textSize = 28;
+    const titleSize = 28;
 
     this.ctx.textBaseline = "top";
     this.ctx.fillStyle = "lime";
-    this.ctx.font = `${textSize}px Dina`;
+    this.ctx.font = `${titleSize}px Dina`;
     this.ctx.textAlign = "center";
 
     const tetrisArt = [
@@ -230,13 +229,112 @@ export class TetrisRenderer {
     ];
 
     const startY = this.ctx.canvas.height / 4;
-    tetrisArt.forEach((line, i) => {
-      this.ctx.fillText(line, this.ctx.canvas.width / 2, startY + i * textSize);
-    });
+    await Promise.all(
+      tetrisArt.map((line, i) =>
+        this.printTextAnimated(
+          line,
+          this.ctx.canvas.width / 2,
+          startY + i * titleSize,
+          titleSize,
+          DELAY_ANIMATION,
+          "rgba(0,0,0,0.0)",
+          "lime"
+        )
+      )
+    );
+
+    const pressStartTextSize = 42;
+
+    this.ctx.font = `${pressStartTextSize}px Dina`;
+    this.printTextAnimated(
+      "PRESS [S] TO START",
+      this.ctx.canvas.width / 2,
+      (this.ctx.canvas.height * 3) / 4,
+      pressStartTextSize,
+      DELAY_ANIMATION,
+      "rgba(0,0,0,0.0)",
+      "white"
+    );
+
+    this.ctx.restore();
+  }
+
+  private async printTextAnimated(
+    text: string,
+    x: number,
+    y: number,
+    fontSize: number = 16,
+    delayMs: number = 50,
+    bgColor: string = "rgba(0,0,0,0.0)",
+    textColor: string = "white",
+    padding: number = 4
+  ) {
+    let partial = "";
+
+    this.ctx.save();
+
+    this.ctx.font = `${fontSize}px Dina`;
+    this.ctx.textAlign = "center";
+    this.ctx.textBaseline = "middle";
+
+    const textWidth = this.ctx.measureText(text).width;
+    const rectHeight = fontSize * 1.4;
+
+    for (let i = 0; i < text.length; i++) {
+      partial += text[i];
+
+      this.ctx.clearRect(x - textWidth / 2 - padding, y - rectHeight / 2, textWidth + padding * 2, rectHeight);
+
+      this.ctx.fillStyle = bgColor;
+      this.ctx.fillRect(x - textWidth / 2 - padding, y - rectHeight / 2, textWidth + padding * 2, rectHeight);
+
+      this.ctx.fillStyle = textColor;
+      this.ctx.fillText(partial, x, y);
+
+      await this.delay(delayMs);
+    }
+
+    this.ctx.restore();
+  }
+
+  async renderWindow(lines: string[], animated: boolean = true) {
+    this.ctx.save();
+
+    const lineHeight = this.blockSize * 1.5;
+    const windowWidth = 12 * this.blockSize;
+    const windowHeight = (lines.length + 1) * lineHeight;
+
+    const x = (this.ctx.canvas.width - windowWidth) / 2;
+    const y = (this.ctx.canvas.height - windowHeight) / 2;
+
+    this.ctx.fillStyle = "rgba(0, 0, 0, 0.8)";
+    this.ctx.fillRect(x, y, windowWidth, windowHeight);
+
+    this.ctx.strokeStyle = "lime";
+    this.ctx.lineWidth = 2;
+    this.ctx.strokeRect(x, y, windowWidth, windowHeight);
 
     this.ctx.fillStyle = "white";
-    this.ctx.font = "42px Dina";
-    this.ctx.fillText("PRESS [S] TO START", this.ctx.canvas.width / 2, (this.ctx.canvas.height * 3) / 4);
+    this.ctx.font = `${this.blockSize}px Dina`;
+    this.ctx.textAlign = "center";
+    this.ctx.textBaseline = "middle";
+
+    if (!animated) {
+      for (let i = 0; i < lines.length; i++) {
+        this.ctx.fillText(lines[i], this.ctx.canvas.width / 2, y + (i + 1) * lineHeight);
+      }
+    } else {
+      for (let i = 0; i < lines.length; i++) {
+        await this.printTextAnimated(
+          lines[i],
+          this.ctx.canvas.width / 2,
+          y + (i + 1) * lineHeight,
+          this.blockSize,
+          DELAY_ANIMATION,
+          "rgba(0,0,0,0.8)"
+        );
+      }
+    }
 
     this.ctx.restore();
   }

@@ -2,11 +2,14 @@ import { GameEngine } from "@core/engine";
 import { useGameStore } from "@store/gameStore";
 import { useCallback, useEffect } from "react";
 
+import { APP_EVENTS, appEventEmitter } from "@/events/appEventEmmiter";
+
 export function useUserInput(engine: GameEngine) {
   const status = useGameStore((s) => s.status);
   const setStatus = useGameStore((s) => s.setStatus);
 
   const togglePause = useCallback(() => {
+    if (status === "gameover" || status === "menu") return;
     if (status === "paused") {
       setStatus("playing");
       engine.status = "playing";
@@ -14,6 +17,8 @@ export function useUserInput(engine: GameEngine) {
       setStatus("paused");
       engine.status = "paused";
     }
+    //remake this better
+    appEventEmitter.emit(APP_EVENTS.STATUS_CHANGED, engine.status);
   }, [status, setStatus, engine]);
 
   const startGame = useCallback(() => {
@@ -24,7 +29,7 @@ export function useUserInput(engine: GameEngine) {
   }, [status, setStatus, engine]);
 
   const restartGame = useCallback(() => {
-    if (status === "playing" || status === "paused") {
+    if (status === "playing" || status === "paused" || status === "gameover") {
       setStatus("restarting");
       engine.status = "restarting";
       engine.restart().then(() => {
