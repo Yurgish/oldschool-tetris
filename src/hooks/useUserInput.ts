@@ -24,11 +24,12 @@ export function useUserInput(engine: GameEngine) {
   }, [status, setStatus, engine]);
 
   const restartGame = useCallback(() => {
-    if (status === "playing") {
+    if (status === "playing" || status === "paused") {
       setStatus("restarting");
       engine.status = "restarting";
-      engine.restart();
-      setStatus("playing");
+      engine.restart().then(() => {
+        setStatus("playing");
+      });
     }
   }, [status, setStatus, engine]);
 

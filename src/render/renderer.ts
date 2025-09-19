@@ -100,7 +100,14 @@ export class TetrisRenderer {
     const startY = 20;
     const lineHeight = this.blockSize;
 
-    const instructions = ["← → : MOVE", "↑ / X : ROTATE", "↓ : SOFT DROP", "SPACE : HARD DROP", "P : PAUSE"];
+    const instructions = [
+      "← → : MOVE",
+      "↑ / X : ROTATE",
+      "↓ : SOFT DROP",
+      "SPACE : HARD DROP",
+      "P : PAUSE",
+      "R : RESTART",
+    ];
 
     instructions.forEach((text, i) => {
       this.ctx.fillText(text, startX, startY + i * lineHeight);
@@ -110,15 +117,19 @@ export class TetrisRenderer {
   private drawNextPiece(nextPiece?: Piece) {
     if (!nextPiece) return;
 
-    const previewX = this.ctx.canvas.width - 200;
-    const previewY = 200;
+    // Центр board по Y
+    const boardHeightPx = BOARD_HEIGHT * this.blockSize;
+    const centerY = this.offsetY + boardHeightPx / 2;
 
-    this.ctx.fillText("NEXT:", previewX, previewY);
+    const previewX = this.offsetX - this.blockSize * 5;
+
+    this.ctx.textAlign = "left";
+    this.ctx.fillText("NEXT:", previewX, centerY - this.blockSize * 2);
 
     nextPiece.shape.forEach((row, y) => {
       row.forEach((cell, x) => {
         if (cell === 1) {
-          this.ctx.fillText("[]", previewX + x * this.blockSize, previewY + (y + 1) * this.blockSize);
+          this.ctx.fillText("[]", previewX + x * this.blockSize, centerY - 20 + y * this.blockSize);
         }
       });
     });

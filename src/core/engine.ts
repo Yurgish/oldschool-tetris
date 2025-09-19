@@ -272,8 +272,6 @@ export class GameEngine {
       MIN_TICK_DELAY,
       Math.floor(INITIAL_TICK_DELAY * Math.pow(TICK_DELAY_DECREASE, this.startLevel - 1))
     );
-    this.animationStatus = "idle";
-    this.status = "playing";
   }
 
   async restart() {
@@ -303,7 +301,12 @@ export class GameEngine {
         nextPiece: this.nextPiece,
       });
     }
+
+    this.animationStatus = "idle";
+
     this.resetState();
     this.render();
+
+    this.status = "playing";
   }
 }

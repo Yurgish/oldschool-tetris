@@ -9,6 +9,8 @@ export function useTetris() {
 
   useEffect(() => {
     const engine = engineRef.current;
+    console.log(engine.status);
+    console.log(status);
 
     if (engine.status !== "playing") return;
 

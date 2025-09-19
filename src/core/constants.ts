@@ -16,7 +16,7 @@ export const MIN_TICK_DELAY = 50;
 
 export const LEVEL_UP_LINES = 10;
 
-export const TICK_DELAY_DECREASE = 0.9; // Each level, the tick delay is multiplied by this factor
+export const TICK_DELAY_DECREASE = 0.85; // Each level, the tick delay is multiplied by this factor (15% faster per level)
 
 export const SRS_KICKS: { normal: KickTable; I: KickTable } = {
   normal: {
