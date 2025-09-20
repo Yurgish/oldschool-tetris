@@ -40,7 +40,7 @@ export function useUserInput(engine: GameEngine) {
 
   useEffect(() => {
     function handleKey(e: KeyboardEvent) {
-      const handled = ["ArrowLeft", "ArrowRight", "ArrowDown", "ArrowUp", "KeyX", "Space", "KeyP", "KeyS"];
+      const handled = ["ArrowLeft", "ArrowRight", "ArrowDown", "ArrowUp", "KeyX", "Space", "KeyP", "KeyS", "KeyB"];
       if (handled.includes(e.code)) {
         e.preventDefault();
       }
@@ -69,6 +69,11 @@ export function useUserInput(engine: GameEngine) {
           break;
         case "KeyR":
           restartGame();
+          break;
+        case "KeyB":
+          if (status === "menu") {
+            appEventEmitter.emit(APP_EVENTS.SHOW_HIGHEST_SCORE);
+          }
           break;
         default:
           break;

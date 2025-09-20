@@ -178,3 +178,10 @@ export const LETTERS = {
   I: ["[][][][][][]", "    [][]    ", "    [][]    ", "    [][]    ", "    [][]    ", "    [][]    ", "[][][][][][]"],
   S: ["[][][][][][]", "[][]        ", "[][]        ", "[][][][][][]", "        [][]", "        [][]", "[][][][][][]"],
 };
+
+export const TETRIS_ART = [
+  ...LETTERS.T.map(
+    (row, i) =>
+      row + "  " + LETTERS.E[i] + "  " + LETTERS.T[i] + "  " + LETTERS.R[i] + " " + LETTERS.I[i] + "  " + LETTERS.S[i]
+  ),
+];

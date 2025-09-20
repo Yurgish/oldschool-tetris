@@ -8,6 +8,7 @@ export const APP_EVENTS = {
   ANIMATE_CLEAR_BLOCKS: "animateClearBlocks",
   STATUS_CHANGED: "statusChanged",
   SCORE_EVENT: "scoreEvent",
+  SHOW_HIGHEST_SCORE: "showHighestScore",
 } as const;
 
 export interface AppEvents {
@@ -24,6 +25,7 @@ export interface AppEvents {
   [APP_EVENTS.ANIMATE_CLEAR_BLOCKS]: (board: Board, linesToClear: number[], hud: GameHUD, done?: () => void) => void;
   [APP_EVENTS.STATUS_CHANGED]: (status: GameStatus) => void;
   [APP_EVENTS.SCORE_EVENT]: (message: string) => void;
+  [APP_EVENTS.SHOW_HIGHEST_SCORE]: () => void;
 }
 
 interface AppEventEmitter extends EventEmitter {

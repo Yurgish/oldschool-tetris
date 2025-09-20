@@ -4,8 +4,9 @@ import {
   BOARD_WIDTH,
   BOARD_WIDTH_WITH_BORDERS,
   DELAY_ANIMATION,
-  LETTERS,
+  TETRIS_ART,
 } from "@core/constants";
+import { HighScoreManager } from "@core/highscore";
 import { type Board, Cell, type GameHUD, type Piece } from "@core/types";
 
 async function loadFont(name: string, url: string) {
@@ -217,8 +218,10 @@ export class TetrisRenderer {
     }
   }
 
-  async renderMenu() {
+  async renderMenu(withAnimation: boolean = true) {
     this.ctx.save();
+
+    this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
 
     const titleSize = 28;
 
@@ -226,51 +229,64 @@ export class TetrisRenderer {
     this.ctx.fillStyle = "lime";
     this.ctx.font = `${titleSize}px Dina`;
     this.ctx.textAlign = "center";
-
-    const tetrisArt = [
-      ...LETTERS.T.map(
-        (row, i) =>
-          row +
-          "  " +
-          LETTERS.E[i] +
-          "  " +
-          LETTERS.T[i] +
-          "  " +
-          LETTERS.R[i] +
-          " " +
-          LETTERS.I[i] +
-          "  " +
-          LETTERS.S[i]
-      ),
-    ];
+    this.ctx.textBaseline = "middle";
 
     const startY = this.ctx.canvas.height / 4;
-    await Promise.all(
-      tetrisArt.map((line, i) =>
-        this.printTextAnimated(
-          line,
-          this.ctx.canvas.width / 2,
-          startY + i * titleSize,
-          titleSize,
-          DELAY_ANIMATION,
-          "rgba(0,0,0,0.0)",
-          "lime"
+    if (withAnimation) {
+      await Promise.all(
+        TETRIS_ART.map((line, i) =>
+          this.printTextAnimated(
+            line,
+            this.ctx.canvas.width / 2,
+            startY + i * titleSize,
+            titleSize,
+            DELAY_ANIMATION,
+            "rgba(0,0,0,0.0)",
+            "lime"
+          )
         )
-      )
-    );
+      );
+    } else {
+      TETRIS_ART.forEach((line, i) => {
+        this.ctx.fillText(line, this.ctx.canvas.width / 2, startY + i * titleSize);
+      });
+    }
 
     const pressStartTextSize = 42;
 
     this.ctx.font = `${pressStartTextSize}px Dina`;
-    this.printTextAnimated(
-      "PRESS [S] TO START",
-      this.ctx.canvas.width / 2,
-      (this.ctx.canvas.height * 3) / 4,
-      pressStartTextSize,
-      DELAY_ANIMATION,
-      "rgba(0,0,0,0.0)",
-      "white"
-    );
+    if (withAnimation) {
+      await this.printTextAnimated(
+        "PRESS [S] TO START",
+        this.ctx.canvas.width / 2,
+        (this.ctx.canvas.height * 3) / 4,
+        pressStartTextSize,
+        DELAY_ANIMATION,
+        "rgba(0,0,0,0.0)",
+        "white"
+      );
+    } else {
+      this.ctx.fillStyle = "white";
+      this.ctx.fillText("PRESS [S] TO START", this.ctx.canvas.width / 2, (this.ctx.canvas.height * 3) / 4);
+    }
+
+    if (new HighScoreManager().getBest()) {
+      if (withAnimation) {
+        await this.printTextAnimated(
+          "PRESS [B] TO SHOW HIGHSCORE",
+          this.ctx.canvas.width - 250,
+          (this.ctx.canvas.height * 3) / 6,
+          pressStartTextSize / 1.5,
+          DELAY_ANIMATION,
+          "rgba(0,0,0,0.0)",
+          "white"
+        );
+      } else {
+        this.ctx.font = `${pressStartTextSize / 1.5}px Dina`;
+        this.ctx.fillStyle = "white";
+        this.ctx.fillText("PRESS [B] TO SHOW HIGHSCORE", this.ctx.canvas.width - 250, (this.ctx.canvas.height * 3) / 6);
+      }
+    }
 
     this.ctx.restore();
   }

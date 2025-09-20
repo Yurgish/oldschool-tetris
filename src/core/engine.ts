@@ -4,6 +4,7 @@ import { APP_EVENTS, appEventEmitter } from "@/events/appEventEmmiter";
 
 import { Bag } from "./bag";
 import { BOARD_HEIGHT, BOARD_WIDTH, INITIAL_TICK_DELAY, MIN_TICK_DELAY, TICK_DELAY_DECREASE } from "./constants";
+import { HighScoreManager } from "./highscore";
 import { ScoreSystem } from "./score";
 import { type Action, type Board, Cell, type GameStatus, type Piece } from "./types";
 
@@ -11,28 +12,24 @@ export class GameEngine {
   board: Board;
   currentPiece: Piece;
   nextPiece: Piece;
-  // score: number = 0;
-  // lines: number = 0;
-  // level: number;
-  // startLevel: number;
   status: GameStatus;
   animationStatus: "idle" | "running";
   private bag: Bag;
   private scoreSystem: ScoreSystem;
+  private highScoreManager: HighScoreManager;
 
   tickSpeed: number;
 
   constructor(startLevel: number = 1) {
-    this.board = this._createTestBoard({ fillBottomRows: 4, skipColumn: 4 }); //for testing
-    // this.board = this.createEmptyBoard();
+    // this.board = this._createTestBoard({ fillBottomRows: 4, skipColumn: 4 }); //for testing
+    this.board = this.createEmptyBoard();
     this.bag = new Bag();
     this.currentPiece = this.bag.next();
     this.nextPiece = this.bag.next();
     this.status = "menu";
     this.animationStatus = "idle";
-    // this.level = startLevel;
-    // this.startLevel = startLevel;
     this.scoreSystem = new ScoreSystem(startLevel);
+    this.highScoreManager = new HighScoreManager();
 
     this.tickSpeed = Math.max(
       MIN_TICK_DELAY,
@@ -90,7 +87,11 @@ export class GameEngine {
     if (this.hasCollision(this.currentPiece)) {
       this.status = "gameover";
       appEventEmitter.emit(APP_EVENTS.STATUS_CHANGED, this.status);
-
+      this.highScoreManager.tryUpdate({
+        score: this.scoreSystem.score,
+        level: this.scoreSystem.getLevel(),
+        lines: this.scoreSystem.lines,
+      });
       return;
     }
     this.nextPiece = this.bag.next();

@@ -1,9 +1,11 @@
+import { HighScoreManager } from "@core/highscore";
 import { TetrisRenderer } from "@render/renderer";
 
 import { APP_EVENTS, appEventEmitter, type AppEvents } from "@/events/appEventEmmiter";
 
 export class RendererManager {
   private renderer: TetrisRenderer;
+  private isHighScoreWindowVisible: boolean = false;
 
   constructor(renderer: TetrisRenderer) {
     this.renderer = renderer;
@@ -17,6 +19,7 @@ export class RendererManager {
     appEventEmitter.on(APP_EVENTS.ANIMATE_CLEAR_BLOCKS, this.handleClearBlocks);
     appEventEmitter.on(APP_EVENTS.STATUS_CHANGED, this.handleStatusChange);
     appEventEmitter.on(APP_EVENTS.SCORE_EVENT, this.handleScoreEvent);
+    appEventEmitter.on(APP_EVENTS.SHOW_HIGHEST_SCORE, this.handleShowHighestScore);
   }
 
   private handleRender: AppEvents[typeof APP_EVENTS.RENDER] = (board, piece, hud) => {
@@ -57,11 +60,26 @@ export class RendererManager {
     this.renderer.setNewScoreMessage(message);
   };
 
+  private handleShowHighestScore: AppEvents[typeof APP_EVENTS.SHOW_HIGHEST_SCORE] = () => {
+    if (this.isHighScoreWindowVisible) {
+      this.isHighScoreWindowVisible = false;
+      this.renderer.renderMenu(false);
+    } else {
+      const highScore = new HighScoreManager().getBest();
+      if (!highScore) return;
+      const lines = Object.entries(highScore).map(([key, value]) => `${key.toUpperCase()}: ${value}`);
+      this.isHighScoreWindowVisible = true;
+      this.renderer.renderWindow(lines);
+    }
+  };
+
   public unsubscribe() {
     appEventEmitter.off(APP_EVENTS.RENDER, this.handleRender);
     appEventEmitter.off(APP_EVENTS.MENU, this.handleMenu);
     appEventEmitter.off(APP_EVENTS.ANIMATE_LINE_CLEAR, this.handleLineClear);
     appEventEmitter.off(APP_EVENTS.ANIMATE_CLEAR_BLOCKS, this.handleClearBlocks);
     appEventEmitter.off(APP_EVENTS.STATUS_CHANGED, this.handleStatusChange);
+    appEventEmitter.off(APP_EVENTS.SCORE_EVENT, this.handleScoreEvent);
+    appEventEmitter.off(APP_EVENTS.SHOW_HIGHEST_SCORE, this.handleShowHighestScore);
   }
 }
