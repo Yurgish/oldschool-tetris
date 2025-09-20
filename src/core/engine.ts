@@ -3,40 +3,36 @@ import { rotatePiece } from "@utils/tetromino";
 import { APP_EVENTS, appEventEmitter } from "@/events/appEventEmmiter";
 
 import { Bag } from "./bag";
-import {
-  BOARD_HEIGHT,
-  BOARD_WIDTH,
-  INITIAL_TICK_DELAY,
-  LEVEL_UP_LINES,
-  MIN_TICK_DELAY,
-  TICK_DELAY_DECREASE,
-} from "./constants";
+import { BOARD_HEIGHT, BOARD_WIDTH, INITIAL_TICK_DELAY, MIN_TICK_DELAY, TICK_DELAY_DECREASE } from "./constants";
+import { ScoreSystem } from "./score";
 import { type Action, type Board, Cell, type GameStatus, type Piece } from "./types";
 
 export class GameEngine {
   board: Board;
   currentPiece: Piece;
   nextPiece: Piece;
-  score: number = 0;
-  lines: number = 0;
-  level: number;
-  startLevel: number;
+  // score: number = 0;
+  // lines: number = 0;
+  // level: number;
+  // startLevel: number;
   status: GameStatus;
   animationStatus: "idle" | "running";
   private bag: Bag;
+  private scoreSystem: ScoreSystem;
 
   tickSpeed: number;
 
   constructor(startLevel: number = 1) {
-    // this.board = this._createTestBoard({ fillBottomRows: 4, skipColumn: 4 }); for testing
-    this.board = this.createEmptyBoard();
+    this.board = this._createTestBoard({ fillBottomRows: 4, skipColumn: 4 }); //for testing
+    // this.board = this.createEmptyBoard();
     this.bag = new Bag();
     this.currentPiece = this.bag.next();
     this.nextPiece = this.bag.next();
     this.status = "menu";
     this.animationStatus = "idle";
-    this.level = startLevel;
-    this.startLevel = startLevel;
+    // this.level = startLevel;
+    // this.startLevel = startLevel;
+    this.scoreSystem = new ScoreSystem(startLevel);
 
     this.tickSpeed = Math.max(
       MIN_TICK_DELAY,
@@ -44,15 +40,19 @@ export class GameEngine {
     );
   }
 
-  render() {
+  async render() {
     if (this.status === "gameover") return;
     if (this.status === "menu") {
-      appEventEmitter.emit(APP_EVENTS.MENU);
+      this.animationStatus = "running";
+      await new Promise<void>((resolve) => {
+        appEventEmitter.emit(APP_EVENTS.MENU, resolve);
+      });
+      this.animationStatus = "idle";
     } else {
       appEventEmitter.emit(APP_EVENTS.RENDER, this.board, this.currentPiece, {
-        score: this.score,
-        lines: this.lines,
-        level: this.level,
+        score: this.scoreSystem.score,
+        lines: this.scoreSystem.lines,
+        level: this.scoreSystem.getLevel(),
         nextPiece: this.nextPiece,
       });
     }
@@ -90,7 +90,7 @@ export class GameEngine {
     if (this.hasCollision(this.currentPiece)) {
       this.status = "gameover";
       appEventEmitter.emit(APP_EVENTS.STATUS_CHANGED, this.status);
-      // this.restart();
+
       return;
     }
     this.nextPiece = this.bag.next();
@@ -184,7 +184,7 @@ export class GameEngine {
     if (!this.hasCollision(moved)) {
       this.currentPiece = moved;
       if (isSoftDrop) {
-        this.score += 1;
+        this.scoreSystem.addSoftDrop(1);
       }
     } else {
       this.mergePiece(this.currentPiece);
@@ -211,8 +211,15 @@ export class GameEngine {
     }
 
     this.currentPiece.position = newPosition;
-    this.score += dropDistance * 2;
+    this.scoreSystem.addHardDrop(dropDistance);
     this.tick();
+  }
+
+  private updateTickSpeed() {
+    this.tickSpeed = Math.max(
+      MIN_TICK_DELAY,
+      Math.floor(INITIAL_TICK_DELAY * Math.pow(TICK_DELAY_DECREASE, this.scoreSystem.getLevel() - 1))
+    );
   }
 
   async checkAndClearLines(): Promise<number[]> {
@@ -224,33 +231,19 @@ export class GameEngine {
       }
     }
 
-    if (linesToClear.length > 0) {
-      this.lines += linesToClear.length;
-      this.score += linesToClear.length * 100 * this.level;
+    this.scoreSystem.addLineClear(linesToClear.length);
 
-      // Level up only once per threshold
-      while (this.lines >= this.level * LEVEL_UP_LINES) {
-        this.level++;
-        this.tickSpeed = Math.max(MIN_TICK_DELAY, Math.floor(this.tickSpeed * TICK_DELAY_DECREASE));
+    if (linesToClear.length > 0) {
+      const prevLevel = this.scoreSystem.getLevel();
+
+      if (this.scoreSystem.getLevel() !== prevLevel) {
+        this.updateTickSpeed();
+        console.log("New tick speed:", this.tickSpeed);
       }
 
       const finalBoard = this.dropBlocks(structuredClone(this.board), linesToClear);
 
       this.animationStatus = "running";
-      appEventEmitter.emit(
-        APP_EVENTS.ANIMATE_LINE_CLEAR,
-        this.board,
-        linesToClear,
-        finalBoard,
-        {
-          score: this.score,
-          lines: this.lines,
-          level: this.level,
-          nextPiece: this.nextPiece,
-        },
-        this.currentPiece
-      );
-
       await new Promise<void>((resolve) => {
         appEventEmitter.emit(
           APP_EVENTS.ANIMATE_LINE_CLEAR,
@@ -258,9 +251,9 @@ export class GameEngine {
           linesToClear,
           finalBoard,
           {
-            score: this.score,
-            lines: this.lines,
-            level: this.level,
+            score: this.scoreSystem.score,
+            lines: this.scoreSystem.lines,
+            level: this.scoreSystem.getLevel(),
             nextPiece: this.nextPiece,
           },
           this.currentPiece,
@@ -284,13 +277,10 @@ export class GameEngine {
   private resetState() {
     this.board = this.createEmptyBoard();
     this.bag = new Bag();
-    this.score = 0;
-    this.lines = 0;
-    this.level = this.startLevel;
-    this.tickSpeed = Math.max(
-      MIN_TICK_DELAY,
-      Math.floor(INITIAL_TICK_DELAY * Math.pow(TICK_DELAY_DECREASE, this.startLevel - 1))
-    );
+
+    this.scoreSystem.reset();
+
+    this.updateTickSpeed();
   }
 
   async restart() {
@@ -318,7 +308,7 @@ export class GameEngine {
         {
           score: 0,
           lines: 0,
-          level: this.startLevel,
+          level: this.scoreSystem.getStartLevel(),
           nextPiece: this.nextPiece,
         },
         resolve

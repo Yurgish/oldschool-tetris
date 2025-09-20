@@ -7,11 +7,12 @@ export const APP_EVENTS = {
   ANIMATE_LINE_CLEAR: "animateLineClear",
   ANIMATE_CLEAR_BLOCKS: "animateClearBlocks",
   STATUS_CHANGED: "statusChanged",
+  SCORE_EVENT: "scoreEvent",
 } as const;
 
 export interface AppEvents {
   [APP_EVENTS.RENDER]: (board: Board, currentPiece?: Piece, hud?: GameHUD) => void;
-  [APP_EVENTS.MENU]: () => void;
+  [APP_EVENTS.MENU]: (done?: () => void) => void;
   [APP_EVENTS.ANIMATE_LINE_CLEAR]: (
     board: Board,
     linesToClear: number[],
@@ -22,6 +23,7 @@ export interface AppEvents {
   ) => void;
   [APP_EVENTS.ANIMATE_CLEAR_BLOCKS]: (board: Board, linesToClear: number[], hud: GameHUD, done?: () => void) => void;
   [APP_EVENTS.STATUS_CHANGED]: (status: GameStatus) => void;
+  [APP_EVENTS.SCORE_EVENT]: (message: string) => void;
 }
 
 interface AppEventEmitter extends EventEmitter {

@@ -21,6 +21,8 @@ export class TetrisRenderer {
   private offsetX: number;
   private offsetY: number;
 
+  private currentScoreMessage: string = "";
+
   constructor(ctx: CanvasRenderingContext2D, blockSize: number = 32) {
     this.ctx = ctx;
     this.blockSize = blockSize;
@@ -48,6 +50,19 @@ export class TetrisRenderer {
   }
 
   private delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
+
+  setNewScoreMessage(text: string) {
+    this.currentScoreMessage = text;
+    setTimeout(() => {
+      if (this.currentScoreMessage === text) {
+        this.currentScoreMessage = "";
+      }
+    }, 3000);
+  }
+
+  private drawScoreMessage() {
+    this.ctx.fillText(this.currentScoreMessage, 20, this.ctx.canvas.height - 100);
+  }
 
   private drawCell(x: number, y: number, filled: boolean) {
     this.ctx.fillText(filled ? "[]" : " .", this.offsetX + (x + 1) * this.blockSize, this.offsetY + y * this.blockSize);
@@ -148,6 +163,7 @@ export class TetrisRenderer {
       this.drawNextPiece(hud.nextPiece);
     }
     this.drawInstructions();
+    this.drawScoreMessage();
   }
 
   async animateLineClear(board: Board, lines: number[], finalBoard: Board, hud: GameHUD, currentPiece?: Piece) {

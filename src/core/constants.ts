@@ -1,5 +1,9 @@
 import type { KickTable } from "./types";
 
+// =========================
+// BOARD DIMENSIONS
+// =========================
+
 export const BOARD_WIDTH = 10;
 export const BOARD_HEIGHT = 20;
 
@@ -7,6 +11,10 @@ export const BOARD_WIDTH_WITH_BORDERS = BOARD_WIDTH + 2;
 export const BOARD_HEIGHT_WITH_BORDERS = BOARD_HEIGHT + 2;
 
 export const BLOCKSIZE = 36;
+
+// =========================
+// TIMING & SPEED
+// =========================
 
 export const DELAY_ANIMATION = 18;
 
@@ -16,7 +24,29 @@ export const MIN_TICK_DELAY = 50;
 
 export const LEVEL_UP_LINES = 10;
 
-export const TICK_DELAY_DECREASE = 0.85; // Each level, the tick delay is multiplied by this factor (15% faster per level)
+export const TICK_DELAY_DECREASE = 0.35; // Each level, the tick delay is multiplied by this factor (15% faster per level)
+
+// =========================
+// SCORING & LEVELS
+// =========================
+
+export const LINE_CLEAR_SCORES: Record<number, { points: number; label: string }> = {
+  1: { points: 100, label: "Single" },
+  2: { points: 300, label: "Double" },
+  3: { points: 500, label: "Triple" },
+  4: { points: 800, label: "Tetris" },
+};
+
+export const BACK_TO_BACK_MULTIPLIER = 1.5;
+
+export const COMBO_BONUS = 50;
+
+export const SOFT_DROP_POINTS = 1;
+export const HARD_DROP_POINTS = 2;
+
+// =========================
+// SRS KICK TABLE
+// =========================
 
 export const SRS_KICKS: { normal: KickTable; I: KickTable } = {
   normal: {
@@ -136,6 +166,10 @@ export const SRS_KICKS: { normal: KickTable; I: KickTable } = {
     ],
   },
 } as const;
+
+// =========================
+// RENDERING & UI
+// =========================
 
 export const LETTERS = {
   T: ["[][][][][][]", "    [][]    ", "    [][]    ", "    [][]    ", "    [][]    ", "    [][]    ", "    [][]    "],

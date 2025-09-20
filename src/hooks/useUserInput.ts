@@ -22,7 +22,7 @@ export function useUserInput(engine: GameEngine) {
   }, [status, setStatus, engine]);
 
   const startGame = useCallback(() => {
-    if (status === "menu") {
+    if (status === "menu" && engine.animationStatus === "idle") {
       setStatus("playing");
       engine.status = "playing";
     }
