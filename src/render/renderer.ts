@@ -283,10 +283,10 @@ export class TetrisRenderer {
     for (let i = 0; i < text.length; i++) {
       partial += text[i];
 
-      this.ctx.clearRect(x - textWidth / 2 - padding, y - rectHeight / 2, textWidth + padding * 2, rectHeight);
+      this.ctx.clearRect(x - textWidth / 2 - padding, y - rectHeight / 2, textWidth + padding * 2, rectHeight * 1.2);
 
       this.ctx.fillStyle = bgColor;
-      this.ctx.fillRect(x - textWidth / 2 - padding, y - rectHeight / 2, textWidth + padding * 2, rectHeight);
+      this.ctx.fillRect(x - textWidth / 2 - padding, y - rectHeight / 2, textWidth + padding * 2, rectHeight * 1.2);
 
       this.ctx.fillStyle = textColor;
       this.ctx.fillText(partial, x, y);
