@@ -231,14 +231,12 @@ export class GameEngine {
       }
     }
 
+    const prevLevel = this.scoreSystem.getLevel();
     this.scoreSystem.addLineClear(linesToClear.length);
 
     if (linesToClear.length > 0) {
-      const prevLevel = this.scoreSystem.getLevel();
-
       if (this.scoreSystem.getLevel() !== prevLevel) {
         this.updateTickSpeed();
-        console.log("New tick speed:", this.tickSpeed);
       }
 
       const finalBoard = this.dropBlocks(structuredClone(this.board), linesToClear);

@@ -24,7 +24,7 @@ export const MIN_TICK_DELAY = 50;
 
 export const LEVEL_UP_LINES = 10;
 
-export const TICK_DELAY_DECREASE = 0.35; // Each level, the tick delay is multiplied by this factor (15% faster per level)
+export const TICK_DELAY_DECREASE = 0.8; // Each level, the tick delay is multiplied by this factor (15% faster per level)
 
 // =========================
 // SCORING & LEVELS

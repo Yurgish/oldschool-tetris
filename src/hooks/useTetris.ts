@@ -38,8 +38,6 @@ export function useTetrisManager(canvasRef: React.RefObject<HTMLCanvasElement>) 
     if (engine.status !== "playing") return;
 
     const interval = setInterval(() => {
-      console.log("tick", engine.status, engine.animationStatus);
-      console.log("store", status);
       engine.tick();
 
       if (engine.tickSpeed !== tickSpeed) {
