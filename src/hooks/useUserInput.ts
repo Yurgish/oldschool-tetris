@@ -1,4 +1,5 @@
 import { GameEngine } from "@core/engine";
+import { soundManager } from "@core/sound";
 import { useGameStore } from "@store/gameStore";
 import { useCallback, useEffect } from "react";
 
@@ -40,7 +41,19 @@ export function useUserInput(engine: GameEngine) {
 
   useEffect(() => {
     function handleKey(e: KeyboardEvent) {
-      const handled = ["ArrowLeft", "ArrowRight", "ArrowDown", "ArrowUp", "KeyX", "Space", "KeyP", "KeyS", "KeyB"];
+      const handled = [
+        "ArrowLeft",
+        "ArrowRight",
+        "ArrowDown",
+        "ArrowUp",
+        "KeyX",
+        "Space",
+        "KeyP",
+        "KeyS",
+        "KeyR",
+        "KeyB",
+        "KeyM",
+      ];
       if (handled.includes(e.code)) {
         e.preventDefault();
       }
@@ -74,6 +87,9 @@ export function useUserInput(engine: GameEngine) {
           if (status === "menu") {
             appEventEmitter.emit(APP_EVENTS.SHOW_HIGHEST_SCORE);
           }
+          break;
+        case "KeyM":
+          soundManager.toggleMute();
           break;
         default:
           break;

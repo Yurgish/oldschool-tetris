@@ -17,11 +17,11 @@ export class ScoreSystem {
   }
 
   addSoftDrop(cells: number) {
-    this.score += cells * 1;
+    this.score += cells * 1 * this.level;
   }
 
   addHardDrop(cells: number) {
-    this.score += cells * 2;
+    this.score += cells * 2 * this.level;
   }
 
   addLineClear(linesCleared: number) {

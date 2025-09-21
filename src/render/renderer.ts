@@ -7,6 +7,7 @@ import {
   TETRIS_ART,
 } from "@core/constants";
 import { HighScoreManager } from "@core/highscore";
+import { soundManager } from "@core/sound";
 import { type Board, Cell, type GameHUD, type Piece } from "@core/types";
 
 async function loadFont(name: string, url: string) {
@@ -16,6 +17,9 @@ async function loadFont(name: string, url: string) {
 }
 
 export class TetrisRenderer {
+  cancelWindowAnimation() {
+    this.isWindowCancelled = true;
+  }
   private ctx: CanvasRenderingContext2D;
   private blockSize: number;
 
@@ -23,6 +27,7 @@ export class TetrisRenderer {
   private offsetY: number;
 
   private currentScoreMessage: string = "";
+  private isWindowCancelled: boolean = false;
 
   constructor(ctx: CanvasRenderingContext2D, blockSize: number = 32) {
     this.ctx = ctx;
@@ -123,6 +128,7 @@ export class TetrisRenderer {
       "SPACE : HARD DROP",
       "P : PAUSE",
       "R : RESTART",
+      "M : MUTE/UNMUTE",
     ];
 
     instructions.forEach((text, i) => {
@@ -152,6 +158,7 @@ export class TetrisRenderer {
 
   render(board: Board, currentPiece?: Piece, hud?: GameHUD) {
     this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+    soundManager.play("moveTetroid");
 
     const tempBoard = board.map((row) => [...row]);
     if (currentPiece) {
@@ -313,6 +320,7 @@ export class TetrisRenderer {
     const rectHeight = fontSize * 1.4;
 
     for (let i = 0; i < text.length; i++) {
+      if (this.isWindowCancelled) break;
       partial += text[i];
 
       this.ctx.clearRect(x - textWidth / 2 - padding, y - rectHeight / 2, textWidth + padding * 2, rectHeight * 1.2);
@@ -330,6 +338,8 @@ export class TetrisRenderer {
   }
 
   async renderWindow(lines: string[], animated: boolean = true) {
+    this.isWindowCancelled = false;
+    soundManager.play("openWindow");
     this.ctx.save();
 
     const lineHeight = this.blockSize * 1.5;
@@ -353,10 +363,12 @@ export class TetrisRenderer {
 
     if (!animated) {
       for (let i = 0; i < lines.length; i++) {
+        if (this.isWindowCancelled) break;
         this.ctx.fillText(lines[i], this.ctx.canvas.width / 2, y + (i + 1) * lineHeight);
       }
     } else {
       for (let i = 0; i < lines.length; i++) {
+        if (this.isWindowCancelled) break;
         await this.printTextAnimated(
           lines[i],
           this.ctx.canvas.width / 2,

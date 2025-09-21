@@ -15,6 +15,7 @@
     "@types/events": "^3.0.3",
     "@types/three": "^0.179.0",
     "events": "^3.3.0",
+    "howler": "^2.2.4",
     "html2canvas": "^1.4.1",
     "install": "^0.13.0",
     "npm": "^11.5.2",
@@ -26,6 +27,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.33.0",
+    "@types/howler": "^2.2.12",
     "@types/node": "^24.5.2",
     "@types/react": "^19.1.10",
     "@types/react-dom": "^19.1.7",

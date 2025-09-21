@@ -9,6 +9,7 @@ export class RendererManager {
 
   constructor(renderer: TetrisRenderer) {
     this.renderer = renderer;
+
     this.subscribe();
   }
 
@@ -63,6 +64,7 @@ export class RendererManager {
   private handleShowHighestScore: AppEvents[typeof APP_EVENTS.SHOW_HIGHEST_SCORE] = () => {
     if (this.isHighScoreWindowVisible) {
       this.isHighScoreWindowVisible = false;
+      this.renderer.cancelWindowAnimation();
       this.renderer.renderMenu(false);
     } else {
       const highScore = new HighScoreManager().getBest();

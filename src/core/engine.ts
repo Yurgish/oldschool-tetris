@@ -6,6 +6,7 @@ import { Bag } from "./bag";
 import { BOARD_HEIGHT, BOARD_WIDTH, INITIAL_TICK_DELAY, MIN_TICK_DELAY, TICK_DELAY_DECREASE } from "./constants";
 import { HighScoreManager } from "./highscore";
 import { ScoreSystem } from "./score";
+import { soundManager } from "./sound";
 import { type Action, type Board, Cell, type GameStatus, type Piece } from "./types";
 
 export class GameEngine {
@@ -202,6 +203,7 @@ export class GameEngine {
 
   private drop() {
     if (this.status !== "playing") return;
+    soundManager.play("dropTetroid");
 
     const newPosition = { ...this.currentPiece.position };
     let dropDistance = 0;
@@ -213,6 +215,7 @@ export class GameEngine {
 
     this.currentPiece.position = newPosition;
     this.scoreSystem.addHardDrop(dropDistance);
+
     this.tick();
   }
 
